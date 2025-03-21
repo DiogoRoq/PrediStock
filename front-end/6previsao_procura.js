@@ -1,7 +1,7 @@
 // Função para criar o gráfico
 function createChart() {
     const ctx = document.getElementById('salesChart').getContext('2d');
-    
+
     window.salesChart = new Chart(ctx, {
         type: 'line',
         data: {
@@ -25,7 +25,7 @@ function createChart() {
         },
         options: {
             responsive: true,
-            maintainAspectRatio: false
+            maintainAspectRatio: true, // Still flexible, but canvas height is now controlled
         }
     });
 }
@@ -45,28 +45,29 @@ function updateChart() {
     }
 
     // Atualiza os dados do gráfico
-    window.salesChart.data.datasets[0].data = newData;
-    window.salesChart.update();
+    if (window.salesChart) {
+        window.salesChart.data.datasets[0].data = newData;
+        window.salesChart.update();
+    }
 }
 
 // Chamar a função para criar o gráfico quando a página carregar
-window.onload = createChart;
+window.addEventListener("DOMContentLoaded", function () {
+    const canvas = document.getElementById('salesChart');
+    
+    // Evita crescimento descontrolado do canvas
+    canvas.height = 300; // ou qualquer valor fixo que funcione bem no layout
+    
+    createChart();
 
-
-document.addEventListener("DOMContentLoaded", function () {
+    // Lógica de menu ativa
     const buttons = document.querySelectorAll(".menu-item");
-
-    // Obtém a página atual pelo nome do arquivo
     const currentPage = window.location.pathname.split("/").pop();
-
-    // Remove 'active-section' de todos os botões antes de ativar o correto
     buttons.forEach(button => {
-        button.classList.remove("active-section"); // Remove a classe de todos
-
-        const buttonPage = button.getAttribute("onclick").match(/'([^']+)'/)[1]; // Obtém a URL do botão
-
+        button.classList.remove("active-section");
+        const buttonPage = button.getAttribute("onclick").match(/'([^']+)'/)[1];
         if (buttonPage === currentPage) {
-            button.classList.add("active-section"); // Ativa apenas o botão da página atual
+            button.classList.add("active-section");
         }
     });
 });
@@ -75,4 +76,3 @@ document.addEventListener("DOMContentLoaded", function () {
 function setActive(page) {
     window.location.href = page;
 }
-
