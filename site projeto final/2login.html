@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt">                                                                                                            <!-- Define o idioma da página como Português -->
+<head>
+    <meta charset="UTF-8">                                                                                                  <!-- Configuração do conjunto de caracteres -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">                                                  <!-- Responsividade para dispositivos móveis -->
+    <title>Login - PrediStock</title>                                                                                       <!-- Título da página -->
+    <link rel="stylesheet" href="2login.css">                                                                               <!-- Importação do arquivo de estilos CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">                <!-- Importação do FontAwesome para ícones -->
+    <script src="2login.js"></script>                                                                                       <!-- Importação do script JavaScript -->
+</head>
+<body>
+    <div class="wrapper">                                                                                                   <!-- Contêiner principal do formulário -->
+        <form action="#">                                                                                                   <!-- Formulário de login -->
+            <h2>Welcome To PrediStock</h2>                                                                                     <!-- Título principal -->
+            <div class="input-field">                                                                                       <!-- Campo de entrada para o nome de usuário -->
+                <input type="text" id="username" placeholder=" " required>
+                <label for="username">Username</label>
+            </div>    
+            <div class="input-field">                                                                                       <!-- Campo de entrada para a senha -->
+                <input type="password" id="password" placeholder=" " required>
+                <label for="password">Enter your password</label>
+                <span class="password-toggle"><i class="fa fa-eye-slash"></i></span>                                        <!-- Ícone para exibir/ocultar senha -->
+            </div>                      
+            <div class="forget">                                                                                            <!-- Opção "Remember me" e link para recuperar senha -->
+                <label for="remember">
+                    <input type="checkbox" id="remember">                                                                   <!-- Checkbox -->
+                    <p>Remember me</p>
+                </label>
+                <a href="3forgot_password.html">Forgot password?</a>
+            </div>    
+            <button type="submit" onclick="location.href='4dashbroard.html'">Log in</button>                                                                           <!-- Botão de login -->
+            <div class="register">                                                                                          <!-- Opção de registro para novos usuários -->
+                <p>
+                    Don't have an account?
+                    <a href="1register.html">Register</a>
+                </p>
+            </div>
+        </form>
+    </div>    
+</body>
+</html>

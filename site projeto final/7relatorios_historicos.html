@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - PrediStock</title>
+    <link rel="stylesheet" href="7relatorios_historicos.css">
+    <script src="7relatorios_historicos.js"></script>   
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="user-profile">
+                <img src="imagem-usuario.png" alt="Foto de Perfil" class="avatar">
+            </div>
+            <nav class="menu">
+                <button class="menu-item" onclick="location.href='4dashbroard.html'">Dashboard Principal</button>
+                <button class="menu-item" onclick="location.href='5gestao_produtos.html'">Gestão de Produtos</button>
+                <button class="menu-item" onclick="location.href='6previsao_procura.html'">Previsão de Procura</button>
+                <button class="menu-item" onclick="location.href='7relatorios_historicos.html'">Relatórios e Estatísticas</button>
+            </nav>
+        </aside>
+        <main class="main-content">
+            <div class="top-buttons">
+                <button class="action-button active" id="btn-relatorios">Relatórios</button>
+                <button class="action-button" id="btn-historico">Histórico de Movimentação</button>
+            </div>
+            <section class="data-table" id="relatorios-section">
+                <h2>Relatórios</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Produto</th>
+                            <th>Quantidade</th>
+                            <th>Data</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>001</td>
+                            <td>Produto A</td>
+                            <td>50</td>
+                            <td>01/04/2024</td>
+                            <td>Disponível</td>
+                        </tr>
+                        <tr>
+                            <td>002</td>
+                            <td>Produto B</td>
+                            <td>30</td>
+                            <td>02/04/2024</td>
+                            <td>Esgotado</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+            <section class="data-table hidden" id="historico-section">
+                <h2>Histórico de Movimentação</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Movimento</th>
+                            <th>Data</th>
+                            <th>Responsável</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>101</td>
+                            <td>Entrada de Estoque</td>
+                            <td>05/04/2024</td>
+                            <td>Maria Silva</td>
+                        </tr>
+                        <tr>
+                            <td>102</td>
+                            <td>Saída de Estoque</td>
+                            <td>06/04/2024</td>
+                            <td>João Souza</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="4dashbroard.css">
+    <script defer src="4dashbroard.js"></script>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Barra Lateral -->
+        <aside class="sidebar">
+            <div class="profile">
+                <img src="imagem-usuario.png" alt="Foto de Perfil" class="avatar">
+            </div>
+            <nav class="menu">
+                <button class="menu-item" onclick="location.href='4dashbroard.html'">Dashboard Principal</button>
+                <button class="menu-item" onclick="location.href='5gestao_produtos.html'">Gestão de Produtos</button>
+                <button class="menu-item" onclick="location.href='6previsao_procura.html'">Previsão de Procura</button>
+                <button class="menu-item active-section" onclick="location.href='7relatorios_historicos.html'">Relatórios e Estatísticas</button>
+            </nav>
+        </aside>
+        <!-- Painel Principal -->
+        <main class="dashboard-content">
+            <header class="dashboard-header">
+                <h1>Dashboard</h1>
+                <input type="text" placeholder="Pesquisar..." class="search-bar">
+                
+                <!-- Ícone do usuário com menu suspenso -->
+                <div class="user-menu">
+                    <div class="user-icon" onclick="toggleMenu()">
+                        <img src="imagem-usuario.png" alt="Usuário">
+                        <span class="dropdown-arrow">▼</span>
+                    </div>
+                    <ul class="dropdown-menu" id="dropdownMenu">
+                        <li><a href="#">Definições</a></li>
+                        <li><a href="#">Perfil</a></li>
+                        <li><a href="2login.html">Sair</a></li>
+                    </ul>
+                </div>
+            </header>
+            <section class="empty-section">
+                <p>Bem-vindo ao Dashboard! Escolha uma opção no menu lateral.</p>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

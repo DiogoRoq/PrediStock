@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Previsão de Procura</title>
+    <link rel="stylesheet" href="6previsao_procura.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> 
+    <script src="6previsao_procura.js"></script>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Barra Lateral -->
+        <aside class="sidebar">
+            <div class="profile">
+                <img src="imagem-usuario.png" alt="Foto de Perfil" class="avatar">
+            </div>
+            <nav class="menu">
+                <button class="menu-item" onclick="location.href='4dashbroard.html'">Dashboard Principal</button>
+                <button class="menu-item" onclick="location.href='5gestao_produtos.html'">Gestão de Produtos</button>
+                <button class="menu-item" onclick="location.href='6previsao_procura.html'">Previsão de Procura</button>
+                <button class="menu-item" onclick="location.href='7relatorios_historicos.html'">Relatórios e Estatísticas</button>
+            </nav>
+        </aside>
+        <!-- Painel Principal -->
+        <main class="dashboard-content">
+            <header class="dashboard-header">
+                <button class="search-btn">🔍</button>
+                <input type="text" id="search-product" placeholder="Selecione um produto...">
+            </header>
+
+            <section class="forecast-section">
+                <h2>Selecione o produto:</h2>
+                <div class="search-container">
+                    <span class="search-icon">🔍</span>
+                    <select id="product-select" onchange="updateChart()">
+                        <option value="Produto A">Produto A</option>
+                        <option value="Produto B">Produto B</option>
+                        <option value="Produto C">Produto C</option>
+                    </select>
+                </div>
+
+                <canvas id="salesChart"></canvas>
+            </section>
+        </main>
+    </div>
+</body>
+</html>
