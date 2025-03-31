@@ -39,8 +39,6 @@ function setActive(page) {
     window.location.href = page;
 }
 
-
-
 document.addEventListener("DOMContentLoaded", function () {
     const form = document.getElementById("formAdicionar");
 
@@ -81,8 +79,21 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         });
     }
-});
 
+    // Fetch and display products on page load
+    fetch("http://localhost:5000/api/get-products")
+        .then(response => response.json())
+        .then(products => {
+            const tableBody = document.getElementById("tabela-produtos");
+            tableBody.innerHTML = ""; // Clear existing rows
+            products.forEach(product => {
+                addProductToTable(product);
+            });
+        })
+        .catch(error => {
+            console.error("Erro ao buscar produtos:", error);
+        });
+});
 
 function addProductToTable({ nome, descricao, preco, quantidade, categoria_id }) {
     const tableBody = document.getElementById("tabela-produtos");
