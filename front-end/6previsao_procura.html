@@ -10,7 +10,6 @@
 </head>
 <body>
     <div class="dashboard-container">
-        <!-- Barra Lateral -->
         <aside class="sidebar">
             <div class="profile">
                 <img src="imagem-usuario.png" alt="Foto de Perfil" class="avatar">
@@ -22,27 +21,84 @@
                 <button class="menu-item" onclick="location.href='7relatorios_historicos.html'">Relatórios e Estatísticas</button>
             </nav>
         </aside>
-        <!-- Painel Principal -->
-        <main class="dashboard-content">
-            <header class="dashboard-header">
-                <button class="search-btn">🔍</button>
-                <input type="text" id="search-product" placeholder="Selecione um produto...">
-            </header>
-
-            <section class="forecast-section">
-                <h2>Selecione o produto:</h2>
-                <div class="search-container">
-                    <span class="search-icon">🔍</span>
-                    <select id="product-select" onchange="updateChart()">
-                        <option value="Produto A">Produto A</option>
-                        <option value="Produto B">Produto B</option>
-                        <option value="Produto C">Produto C</option>
-                    </select>
-                </div>
-
-                <canvas id="salesChart"></canvas>
+        <div class="dashboard-content">
+          <h3>Model Status: <span id="model-status">Loading...</span></h3>
+          <button id="predict-demand-btn" onclick="predictDemand()">Predict Demand</button>
+          <p id="prediction-note" style="font-style: italic; color: #555; margin-top: 20px;">
+            🔍 The predicted demand represents <strong>weekly sales per product</strong> based on current stock.
+          </p>
+          
+          <div id="prediction-results"></div>
+        </div>
+      </div>
             </section>
         </main>
     </div>
 </body>
 </html>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  checkModelStatus();
+});
+
+function checkModelStatus() {
+  fetch('http://127.0.0.1:5000/model-status')
+    .then(res => res.json())
+    .then(data => {
+      const status = data.trained ? "✅ Trained" : "❌ Not Trained";
+      document.getElementById('model-status').innerText = status;
+    })
+    .catch(err => {
+      console.error("Error checking model status:", err);
+      document.getElementById('model-status').innerText = '⚠️ Error';
+    });
+}
+
+function predictDemand() {
+  fetch('http://127.0.0.1:5000/predict-demand')
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not OK');
+      }
+      return response.json();
+    })
+    .then(data => {
+      const container = document.getElementById('prediction-results');
+
+      if (data.error) {
+        container.innerHTML = `<p style="color:red;">Error: ${data.error}</p>`;
+        return;
+      }
+
+      if (!Array.isArray(data) || data.length === 0) {
+        container.innerHTML = `<p>No predictions returned.</p>`;
+        return;
+      }
+
+      
+      const headers = ['product_name', 'predicted_units_sold'];
+
+      let html = '<h3>Predicted Demand</h3><table border="1" cellpadding="5"><tr>';
+      headers.forEach(h => {
+        html += `<th>${h}</th>`;
+      });
+      html += '</tr>';
+
+      data.forEach(row => {
+        html += '<tr>';
+        headers.forEach(h => {
+          html += `<td>${row[h]}</td>`;
+        });
+        html += '</tr>';
+      });
+
+      html += '</table>';
+      container.innerHTML = html;
+    })
+    .catch(err => {
+      console.error("Prediction request failed:", err);
+      document.getElementById('prediction-results').innerHTML =
+        `<p style="color:red;">Request failed: ${err}</p>`;
+    });
+}
+</script>

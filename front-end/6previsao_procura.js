@@ -76,3 +76,49 @@ window.addEventListener("DOMContentLoaded", function () {
 function setActive(page) {
     window.location.href = page;
 }
+
+document.getElementById('upload-form').addEventListener('submit', function (event) {
+    event.preventDefault();
+  
+    const fileInput = document.getElementById('csv-file');
+    const formData = new FormData();
+    formData.append('file', fileInput.files[0]);
+  
+    fetch('/forecast', {
+      method: 'POST',
+      body: formData
+    })
+      .then(response => response.json())
+      .then(data => {
+        const container = document.getElementById('forecast-results');
+        if (data.error) {
+          container.innerHTML = `<p style="color:red;">Error: ${data.error}</p>`;
+          return;
+        }
+  
+        let html = '<h3>Predicted Demand</h3><table border="1" cellpadding="5"><tr>';
+        const keys = Object.keys(data[0]);
+  
+        // Table headers
+        keys.forEach(key => {
+          html += `<th>${key}</th>`;
+        });
+        html += '</tr>';
+  
+        // Table rows
+        data.forEach(row => {
+          html += '<tr>';
+          keys.forEach(key => {
+            html += `<td>${row[key]}</td>`;
+          });
+          html += '</tr>';
+        });
+  
+        html += '</table>';
+        container.innerHTML = html;
+      })
+      .catch(error => {
+        document.getElementById('forecast-results').innerHTML = `<p style="color:red;">Request failed: ${error}</p>`;
+      });
+  });
+  
