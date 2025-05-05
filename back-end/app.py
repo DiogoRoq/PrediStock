@@ -14,7 +14,7 @@ import os
 app = Flask(__name__)
 CORS(app)
 
-# Connect to MySQL (adjust the database name to match yours)
+
 db_config = {
     'host': 'localhost',
     'user': 'root',
@@ -25,7 +25,7 @@ db_config = {
 
 
 model_path = 'trained_demand_model.pkl'
-model_trained = False  # simple flag for training state
+model_trained = False
 
 from sklearn.preprocessing import LabelEncoder
 
@@ -34,7 +34,7 @@ def train_model_from_db():
     global model_trained
     try:
         conn = mysql.connector.connect(**db_config)
-        cursor = conn.cursor(dictionary=True)
+        cursor = conn.cursor(dictionary=True)  
 
         cursor.execute("SELECT * FROM sample_500_with_product_names")
         rows = cursor.fetchall()
@@ -46,18 +46,18 @@ def train_model_from_db():
         if df.empty:
             return jsonify({'status': 'error', 'message': 'No data found'})
 
-        # Parse date & add time features
+        
         df['week'] = pd.to_datetime(df['week'], format="%d/%m/%y")
         df['week_number'] = df['week'].dt.isocalendar().week
         df['year'] = df['week'].dt.year
 
-        # Encode product_name
+        
         le = LabelEncoder()
         df['product_name_encoded'] = le.fit_transform(df['product_name'])
 
-        # Save the label encoder for later use in prediction
+        
         joblib.dump(le, 'label_encoder.pkl')
-        # Define features and target
+    
         features = [
             'store_id', 'sku_id', 'week_number', 'year',
             'base_price', 'is_featured_sku', 'is_display_sku', 'product_name_encoded'
@@ -100,8 +100,6 @@ def predict_demand():
         df['week'] = pd.to_datetime(df['week'], format='%y/%m/%d')
         df['week_number'] = df['week'].dt.isocalendar().week
         df['year'] = df['week'].dt.year
-
-        # Encode product_name using the same label encoder
         df['product_name_encoded'] = le.transform(df['product_name'])
 
         features = [
