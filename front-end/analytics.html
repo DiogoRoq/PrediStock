@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - PrediStock</title>
-    <link rel="stylesheet" href="7relatorios_historicos.css">
-    <script src="7relatorios_historicos.js"></script>   
+    <link rel="stylesheet" href="main.css">
+    <script src="js/7relatorios_historicos.js"></script>
 </head>
 <body>
     <div class="dashboard-container">
@@ -26,37 +26,8 @@
                 <button class="action-button" id="btn-historico">Histórico de Movimentação</button>
             </div>
             <h3>Train Demand Forecasting Model</h3>
-<button onclick="trainModel()">Train Model</button>
-<p id="train-status"></p>
-
-<script>
-function trainModel() {
-    fetch('http://127.0.0.1:5000/train-model', { method: 'POST' })
-    .then(res => res.json())
-    .then(data => {
-      const status = data.status === 'success' ? '✅ ' + data.message : '❌ ' + data.message;
-      document.getElementById('train-status').innerText = status;
-    })
-    .catch(err => {
-      document.getElementById('train-status').innerText = 'Error: ' + err;
-    });
-}
-</script>
-
-            <section class="data-table" id="relatorios-section">
-                <h2>Relatórios</h2>
-                <table>
-                    <thead>
-                    </tbody>
-                </table>
-            </section>
-            <section class="data-table hidden" id="historico-section">
-                <h2>Histórico de Movimentação</h2>
-                <table>
-                    <thead>
-                    </tbody>
-                </table>
-            </section>
+            <button onclick="trainModel()">Train Model</button>
+            <p id="train-status"></p>
         </main>
     </div>
 </body>

@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestão de Produtos</title>
-    <link rel="stylesheet" href="5gestao_produtos.css">
-    <script src="5gestao_produtos.js"></script>
+    <link rel="stylesheet" href="main.css">
+    <script src="js/5gestao_produtos.js"></script>
 </head>
 <body>
     <div class="dashboard-container">
@@ -55,36 +55,6 @@
                 </table>
             </section>
         </main>
-    </div>
-
-    <!-- Modal para Adicionar Produto -->
-    <div id="modal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="fecharModal()">&times;</span>
-            <h2>Adicionar Produto</h2>
-            <form id="formAdicionar">
-                <label for="nome">Nome:</label>
-                <input type="text" id="nome" name="nome" required>
-
-                <label for="descricao">Descrição:</label>
-                <textarea id="descricao" name="descricao"></textarea>
-
-                <label for="preco">Preço:</label>
-                <input type="number" id="preco" name="preco" step="0.01" required>
-
-                <label for="quantidade">Quantidade:</label>
-                <input type="number" id="quantidade" name="quantidade" required>
-
-                <label for="categoria">Categoria:</label>
-                <select id="categoria" name="categoria_id">
-                    <option value="1">Produto Final</option>
-                    <option value="2">Produto Intermédio</option>
-                    <option value="3">Matéria-Prima</option>
-                </select>
-
-                <button type="submit">Salvar</button>
-            </form>
-        </div>
     </div>
 </body>
 </html>
