@@ -28,6 +28,7 @@ model_path = 'trained_demand_model.pkl'
 model_trained = False
 
 
+
 @app.route('/train-model', methods=['POST'])
 def train_model_from_db():
     global model_trained
