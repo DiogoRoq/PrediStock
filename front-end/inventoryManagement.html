@@ -11,32 +11,28 @@
         <!-- Sidebar -->
         <aside class="sidebar">
             <div class="profile">
-                <img src="imagem-usuario.png" alt="Foto de Perfil" class="avatar">
-                <p>Usuário</p>
+                <img src="imagem-usuario.png" alt="Icon" class="avatar">
+                <p class="username">Usuário</p>
             </div>
             <nav class="menu">
-                <button class="menu-item active" onclick="location.href='dashboard.html'">Dashboard Principal</button>
-                <button class="menu-item" onclick="location.href='inventoryManagement.html'">Gestão de Produtos</button>
+                <button class="menu-item" onclick="location.href='dashboard.html'">Dashboard Principal</button>
+                <button class="menu-item active-section" onclick="location.href='inventoryManagement.html'">Gestão de Produtos</button>
                 <button class="menu-item" onclick="location.href='demandPrediction.html'">Previsão de Procura</button>
                 <button class="menu-item" onclick="location.href='analytics.html'">Relatórios e Estatísticas</button>
             </nav>
         </aside>
-
         <!-- Main Content -->
         <main class="dashboard-content">
-            <header class="dashboard-header">
-                <div class="search-container">
-                    <input type="text" placeholder="Pesquisar produto..." class="search-input">
-                    <button class="search-btn">Pesquisa</button>
-                </div>
-            </header>
-
-            <section class="product-management">
-                <div class="actions">
-                    <!-- Updated Adicionar Button -->
-                    <button class="add-btn" onclick="location.href='addProductForm.html'">Adicionar</button>
-                </div>
-                <table class="product-table">
+            <div class="content-header">
+                <h2>Gestão de Produtos</h2>
+                <p>Gerencie seus produtos abaixo.</p>
+            </div>
+            <div class="inventory-actions">
+                <input type="text" placeholder="Pesquisar produto..." class="search-input">
+                <button class="btn-primary" onclick="location.href='addProductForm.html'">Adicionar</button>
+            </div>
+            <div class="inventory-table">
+                <table>
                     <thead>
                         <tr>
                             <th>Nome</th>
@@ -46,7 +42,7 @@
                             <th>Categoria</th>
                         </tr>
                     </thead>
-                    <tbody id="tabela-produtos">
+                    <tbody>
                         <tr>
                             <td>Produto A</td>
                             <td>Descrição</td>
@@ -56,7 +52,7 @@
                         </tr>
                     </tbody>
                 </table>
-            </section>
+            </div>
         </main>
     </div>
 </body>

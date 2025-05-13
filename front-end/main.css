@@ -2,22 +2,26 @@
 body {
     margin: 0;
     font-family: Arial, sans-serif;
+    background-color: #f4f4f9;
+    color: #2c3e50;
 }
 
 .dashboard-container {
     display: flex;
-    height: 100vh;
+    height: 100vh; /* Full page height */
 }
 
 /* Sidebar */
 .sidebar {
     width: 250px;
-    background-color: #2c3e50;
+    background-color: #34495e;
     color: white;
     display: flex;
     flex-direction: column;
     align-items: center;
     padding: 20px 0;
+    height: 100vh;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
 }
 
 .sidebar .profile {
@@ -26,90 +30,181 @@ body {
 }
 
 .sidebar .profile .avatar {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%; /* Makes the icon round */
     margin-bottom: 10px;
     border: 3px solid white;
+    object-fit: cover; /* Ensures the image scales properly */
+    display: block;
+}
+
+.sidebar .profile img[alt] {
+    display: inline-block;
+    font-size: 14px;
+    color: white; /* Adjust color for visibility */
+    text-align: center;
+    line-height: 80px; /* Vertically center text within the circular space */
+}
+
+.sidebar .profile .username {
+    font-size: 16px;
+    font-weight: bold;
 }
 
 .sidebar .menu {
     width: 100%;
+    margin-top: 20px;
 }
 
 .sidebar .menu-item {
     width: 100%;
     padding: 10px 20px;
-    border: none;
     background: none;
     color: white;
     text-align: left;
     font-size: 16px;
     cursor: pointer;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border: none;
+    outline: none;
+    transition: background-color 0.3s ease;
 }
 
-.sidebar .menu-item:hover, .sidebar .menu-item.active {
-    background-color: #34495e;
+.sidebar .menu-item.active-section {
+    background-color: #2c3e50;
+}
+
+.sidebar .menu-item:hover {
+    background-color: #3b4a5a;
 }
 
 /* Main Content */
 .dashboard-content {
     flex: 1;
-    background-color: #ecf0f1;
-    padding: 20px;
+    padding: 40px;
 }
 
-.dashboard-header h1 {
+/* Content Header */
+.content-header h2 {
     margin: 0;
-    color: #2c3e50;
-}
-
-/* Form Styles */
-.form-section {
-    background-color: white;
-    padding: 20px;
-    border-radius: 5px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    max-width: 600px;
-    margin: 20px auto;
-}
-
-.form-group {
-    margin-bottom: 15px;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 5px;
-    color: #2c3e50;
+    font-size: 1.8rem;
     font-weight: bold;
+    margin-bottom: 10px;
 }
 
-.form-group input[type="text"],
-.form-group input[type="number"] {
-    width: 100%;
+.content-header p {
+    font-size: 1rem;
+    color: #555;
+    margin: 0;
+}
+
+/* Inventory Management Specific Styles */
+.inventory-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.search-input {
     padding: 10px;
-    font-size: 16px;
+    font-size: 14px;
+    width: 70%;
     border: 1px solid #ccc;
     border-radius: 4px;
+    box-sizing: border-box;
 }
 
-.form-group input[type="checkbox"] {
-    margin-left: 10px;
-}
-
-.submit-btn {
-    display: inline-block;
+.btn-primary {
+    padding: 10px 20px;
     background-color: #27ae60;
     color: white;
-    padding: 10px 20px;
-    font-size: 16px;
     border: none;
     border-radius: 4px;
     cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
 }
 
-.submit-btn:hover {
-    background-color: #2ecc71;
+.btn-primary:hover {
+    background-color: #219150;
+}
+
+.inventory-table table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.inventory-table th, .inventory-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+    font-size: 14px;
+}
+
+.inventory-table th {
+    background-color: #34495e;
+    color: white;
+}
+
+.inventory-table tr:hover {
+    background-color: #f4f4f4;
+}
+
+.inventory-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Add Product Form Specific Styles */
+.add-product-form {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.add-product-form .form-group {
+    margin-bottom: 15px;
+}
+
+.add-product-form .form-group label {
+    display: block;
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.add-product-form .form-group input[type="text"],
+.add-product-form .form-group input[type="number"] {
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.add-product-form .form-group input[type="checkbox"] {
+    margin-right: 10px;
+}
+
+.add-product-form .btn-primary {
+    padding: 10px 20px;
+    background-color: #27ae60;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+.add-product-form .btn-primary:hover {
+    background-color: #219150;
 }

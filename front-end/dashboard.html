@@ -9,40 +9,25 @@
 </head>
 <body>
     <div class="dashboard-container">
-        <!-- Barra Lateral -->
+        <!-- Sidebar -->
         <aside class="sidebar">
             <div class="profile">
-                <img src="imagem-usuario.png" alt="Foto de Perfil" class="avatar">
+                <img src="imagem-usuario.png" alt="Icon" class="avatar">
+                <p class="username">Usuário</p>
             </div>
             <nav class="menu">
-                <button class="menu-item" onclick="location.href='dashboard.html'">Dashboard Principal</button>
+                <button class="menu-item active-section" onclick="location.href='dashboard.html'">Dashboard Principal</button>
                 <button class="menu-item" onclick="location.href='inventoryManagement.html'">Gestão de Produtos</button>
                 <button class="menu-item" onclick="location.href='demandPrediction.html'">Previsão de Procura</button>
-                <button class="menu-item active-section" onclick="location.href='analytics.html'">Relatórios e Estatísticas</button>
+                <button class="menu-item" onclick="location.href='analytics.html'">Relatórios e Estatísticas</button>
             </nav>
         </aside>
-        <!-- Painel Principal -->
+        <!-- Main Content -->
         <main class="dashboard-content">
-            <header class="dashboard-header">
-                <h1>Dashboard</h1>
-                <input type="text" placeholder="Pesquisar..." class="search-bar">
-                
-                <!-- Ícone do usuário com menu suspenso -->
-                <div class="user-menu">
-                    <div class="user-icon" onclick="toggleMenu()">
-                        <img src="imagem-usuario.png" alt="Usuário">
-                        <span class="dropdown-arrow">▼</span>
-                    </div>
-                    <ul class="dropdown-menu" id="dropdownMenu">
-                        <li><a href="#">Definições</a></li>
-                        <li><a href="#">Perfil</a></li>
-                        <li><a href="login.html">Sair</a></li>
-                    </ul>
-                </div>
-            </header>
-            <section class="empty-section">
-                <p>Bem-vindo ao Dashboard! Escolha uma opção no menu lateral.</p>
-            </section>
+            <div class="content-header">
+                <h2>Bem-vindo ao Dashboard!</h2>
+                <p>Escolha uma opção no menu lateral.</p>
+            </div>
         </main>
     </div>
 </body>
