@@ -32,4 +32,70 @@
         </div>
     </div>
 </body>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  checkModelStatus();
+});
+
+function checkModelStatus() {
+  fetch('http://127.0.0.1:5000/model-status')
+    .then(res => res.json())
+    .then(data => {
+      const status = data.trained ? "✅ Trained" : "❌ Not Trained";
+      document.getElementById('model-status').innerText = status;
+    })
+    .catch(err => {
+      console.error("Error checking model status:", err);
+      document.getElementById('model-status').innerText = '⚠️ Error';
+    });
+}
+
+function predictDemand() {
+  fetch('http://127.0.0.1:5000/predict-demand')
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not OK');
+      }
+      return response.json();
+    })
+    .then(data => {
+      const container = document.getElementById('prediction-results');
+
+      if (data.error) {
+        container.innerHTML = `<p style="color:red;">Error: ${data.error}</p>`;
+        return;
+      }
+
+      if (!Array.isArray(data) || data.length === 0) {
+        container.innerHTML = `<p>No predictions returned.</p>`;
+        return;
+      }
+
+      
+      const headers = ['product_name', 'predicted_units_sold'];
+
+      let html = '<h3>Predicted Demand</h3><table border="1" cellpadding="5"><tr>';
+      headers.forEach(h => {
+        html += `<th>${h}</th>`;
+      });
+      html += '</tr>';
+
+      data.forEach(row => {
+        html += '<tr>';
+        headers.forEach(h => {
+          html += `<td>${row[h]}</td>`;
+        });
+        html += '</tr>';
+      });
+
+      html += '</table>';
+      container.innerHTML = html;
+    })
+    .catch(err => {
+      console.error("Prediction request failed:", err);
+      document.getElementById('prediction-results').innerHTML =
+        `<p style="color:red;">Request failed: ${err}</p>`;
+    });
+}
+</script>
 </html>

@@ -30,5 +30,18 @@
             <p id="train-status"></p>
         </main>
     </div>
+    <script>
+function trainModel() {
+    fetch('http://127.0.0.1:5000/train-model', { method: 'POST' })
+    .then(res => res.json())
+    .then(data => {
+      const status = data.status === 'success' ? '✅ ' + data.message : '❌ ' + data.message;
+      document.getElementById('train-status').innerText = status;
+    })
+    .catch(err => {
+      document.getElementById('train-status').innerText = 'Error: ' + err;
+    });
+}
+</script>
 </body>
 </html>
