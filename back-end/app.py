@@ -7,12 +7,13 @@ import datetime
 import pandas as pd
 import numpy as np
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
 import joblib
 import os
 
 app = Flask(__name__)
-CORS(app)
+app.secret_key = '91a0da2ffd8ae6a6d4349248d56d677bf30566cc8a873f9fa09d03e6c14beb0a'
+CORS(app, resources={r"/*": {"origins": "*"}}, allow_headers="*", methods=["GET", "POST", "OPTIONS"], supports_credentials=True)
 
 
 db_config = {
@@ -23,11 +24,9 @@ db_config = {
     'charset': 'utf8'
 }
 
-
 model_path = 'trained_demand_model.pkl'
 model_trained = False
 
-from sklearn.preprocessing import LabelEncoder
 
 @app.route('/train-model', methods=['POST'])
 def train_model_from_db():
@@ -120,60 +119,6 @@ def predict_demand():
 
 
 
-
-@app.route('/api/register', methods=['POST'])
-def register():
-    data = request.get_json()
-    username = data.get('username')
-    password = generate_password_hash(data.get('password'), method='sha256')
-
-    try:
-        # Establish database connection and create a cursor
-        conn = mysql.connector.connect(**db_config)
-        cursor = conn.cursor()
-
-        # Insert user data into the database
-        query = "INSERT INTO users (username, password) VALUES (%s, %s)"
-        cursor.execute(query, (username, password))
-        conn.commit()
-
-        cursor.close()
-        conn.close()
-
-        return jsonify({'message': 'User registered successfully!'}), 201
-    except Exception as e:
-        return jsonify({'error': str(e)}), 400
-
-@app.route('/api/login', methods=['POST'])
-def login():
-    data = request.get_json()
-    username = data.get('username')
-    password = data.get('password')
-
-    try:
-        # Establish database connection and create a cursor
-        conn = mysql.connector.connect(**db_config)
-        cursor = conn.cursor()
-
-        # Query user data from the database
-        query = "SELECT * FROM users WHERE username = %s"
-        cursor.execute(query, (username,))
-        user = cursor.fetchone()
-
-        cursor.close()
-        conn.close()
-
-        if user and check_password_hash(user[2], password):
-            token = jwt.encode(
-                {'user_id': user[0], 'exp': datetime.datetime.utcnow() + datetime.timedelta(days=1)},
-                app.config['SECRET_KEY'],
-                algorithm='HS256'
-            )
-            return jsonify({'token': token}), 200
-        else:
-            return jsonify({'message': 'Invalid username or password'}), 401
-    except Exception as e:
-        return jsonify({'error': str(e)}), 400
 
 @app.route('/api/add-product', methods=['POST'])
 def add_product():
@@ -310,6 +255,103 @@ def graph_sales_history():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+
+def get_db_connection():
+    return mysql.connector.connect(**db_config)
+
+@app.route('/register', methods=['POST'])
+def register():
+    data = request.json
+    username = data.get('username')
+    email = data.get('email')
+    password = data.get('password')
+
+    if not all([username, email, password]):
+        return jsonify({'status': 'error', 'message': 'All fields are required'}), 400
+
+    hashed_password = generate_password_hash(password)
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO users (username, email, password_hash) VALUES (%s, %s, %s)",
+                       (username, email, hashed_password))
+        conn.commit()
+        return jsonify({'status': 'success', 'message': 'User registered successfully'})
+    except mysql.connector.IntegrityError:
+        return jsonify({'status': 'error', 'message': 'User already exists'}), 409
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+@app.route('/login', methods=['POST'])
+def login():
+    data = request.json
+    email = data.get('email')
+    password = data.get('password')
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
+        user = cursor.fetchone()
+        if user and check_password_hash(user['password_hash'], password):
+            token = jwt.encode({
+                'user_id': user['id'],
+                'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=24)
+            }, app.secret_key, algorithm='HS256')
+            return jsonify({'status': 'success', 'token': token})
+        return jsonify({'status': 'error', 'message': 'Invalid credentials'}), 401
+    finally:
+        cursor.close()
+        conn.close()
+
+@app.route('/forgot-password', methods=['POST'])
+def forgot_password():
+    data = request.json
+    email = data.get('email')
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
+        if cursor.fetchone() is None:
+            return jsonify({'status': 'error', 'message': 'Email not found'}), 404
+
+        token = os.urandom(16).hex()
+        expiry = datetime.datetime.utcnow() + datetime.timedelta(minutes=15)
+        cursor.execute("UPDATE users SET reset_token = %s, reset_token_expiry = %s WHERE email = %s",
+                       (token, expiry, email))
+        conn.commit()
+        return jsonify({'status': 'success', 'reset_token': token})
+    finally:
+        cursor.close()
+        conn.close()
+
+@app.route('/reset-password', methods=['POST'])
+def reset_password():
+    data = request.json
+    token = data.get('token')
+    new_password = data.get('new_password')
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM users WHERE reset_token = %s AND reset_token_expiry > NOW()", (token,))
+        user = cursor.fetchone()
+        if not user:
+            return jsonify({'status': 'error', 'message': 'Invalid or expired token'}), 400
+
+        hashed_password = generate_password_hash(new_password)
+        cursor.execute("UPDATE users SET password_hash = %s, reset_token = NULL, reset_token_expiry = NULL WHERE reset_token = %s",
+                       (hashed_password, token))
+        conn.commit()
+        return jsonify({'status': 'success', 'message': 'Password reset successful'})
+    finally:
+        cursor.close()
+        conn.close()
+
+
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
-

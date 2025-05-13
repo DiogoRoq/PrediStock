@@ -1,32 +1,21 @@
-document.addEventListener("DOMContentLoaded", function() {
-    // Seleciona todos os ícones de alternância de senha
-    const togglePasswordIcons = document.querySelectorAll(".password-toggle i");
+document.getElementById("registerForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
 
-    togglePasswordIcons.forEach(icon => {
-        const passwordInput = icon.closest(".password-container").querySelector("input");
-        const toggleContainer = icon.parentElement;
+    const username = document.getElementById("username").value;
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
 
-        // Esconder o ícone no início
-        toggleContainer.style.display = "none";
-
-        // Alternância da visibilidade da senha
-        icon.addEventListener("click", function() {
-            if (passwordInput.type === "password") {
-                passwordInput.type = "text"; // Exibe a senha
-                icon.classList.replace("fa-eye-slash", "fa-eye"); // Alterna para olho aberto
-            } else {
-                passwordInput.type = "password"; // Oculta a senha
-                icon.classList.replace("fa-eye", "fa-eye-slash"); // Alterna para olho fechado
-            }
-        });
-
-        // Mostrar o ícone apenas quando o usuário digitar
-        passwordInput.addEventListener("input", function() {
-            if (passwordInput.value === "") {
-                toggleContainer.style.display = "none"; // Esconder ícone se o campo estiver vazio
-            } else {
-                toggleContainer.style.display = "block"; // Mostrar ícone se houver texto
-            }
-        });
+    const response = await fetch("http://localhost:5000/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, email, password }),
     });
+
+    const data = await response.json();
+    if (data.status === "success") {
+        alert("Registration successful!");
+        window.location.href = "login.html";
+    } else {
+        alert("Error: " + data.message);
+    }
 });
