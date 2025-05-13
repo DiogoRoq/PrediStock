@@ -8,7 +8,19 @@ document.getElementById("loginForm").addEventListener("submit", async function (
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
-    });
+    })
+    .then(response => response.json())
+    .then(data => {
+    if (data.token) {
+        // ✅ Save token locally
+        localStorage.setItem("jwtToken", data.token);
+        // Redirect or show success
+        window.location.href = "dashboard.html";
+    } else {
+        alert(data.error || "Login failed.");
+    }
+})
+.catch(err => alert("Error: " + err));
 
     const data = await response.json();
     if (data.status === "success") {

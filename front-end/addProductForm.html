@@ -74,44 +74,50 @@
     </div>
 
     <script>
-        async function addProduct(event) {
-            event.preventDefault();
+    document.querySelector(".add-product-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
 
-            const formData = {
-                record_ID: document.getElementById("record_ID").value,
-                store_id: document.getElementById("store_id").value,
-                sku_id: document.getElementById("sku_id").value,
-                product_name: document.getElementById("product_name").value,
-                total_price: parseFloat(document.getElementById("total_price").value),
-                base_price: parseFloat(document.getElementById("base_price").value),
-                units_sold: parseInt(document.getElementById("units_sold").value),
-                is_featured_sku: document.getElementById("is_featured_sku").checked ? 1 : 0,
-                is_display_sku: document.getElementById("is_display_sku").checked ? 1 : 0,
-            };
+        const formData = {
+            record_ID: document.getElementById("record-id").value,
+            store_id: document.getElementById("store-id").value,
+            sku_id: document.getElementById("sku-id").value,
+            product_name: document.getElementById("product-name").value,
+            total_price: parseFloat(document.getElementById("total-price").value),
+            base_price: parseFloat(document.getElementById("base-price").value),
+            units_sold: parseInt(document.getElementById("units-sold").value),
+            is_featured_sku: document.getElementById("is-featured-sku").checked ? 1 : 0,
+            is_display_sku: document.getElementById("is-display-sku").checked ? 1 : 0,
+        };
 
-            const token = "your_jwt_token"; // Replace this with the actual JWT token
-
-            try {
-                const response = await fetch("/api/add-product", {
-                    method: "POST",
-                    headers: {
-                        "Authorization": `Bearer ${token}`,
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(formData),
-                });
-
-                const result = await response.json();
-                if (response.ok) {
-                    alert(result.message);
-                    location.href = "inventoryManagement.html"; // Redirect back to inventory page
-                } else {
-                    alert(result.error);
-                }
-            } catch (error) {
-                alert("An error occurred: " + error.message);
-            }
+        const token = localStorage.getItem("jwtToken");
+        if (!token) {
+            alert("You are not logged in!");
+            window.location.href = "login.html";
+            return;
         }
-    </script>
+
+
+        try {
+            const response = await fetch("http://127.0.0.1:5000/api/add-product", {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(formData),
+            });
+
+            const result = await response.json();
+            if (response.ok) {
+                alert(result.message);
+                location.href = "inventoryManagement.html";
+            } else {
+                alert(result.error);
+            }
+        } catch (error) {
+            alert("An error occurred: " + error.message);
+        }
+    });
+</script>
 </body>
 </html>

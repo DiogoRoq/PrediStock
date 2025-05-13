@@ -3,7 +3,7 @@ from flask_cors import CORS
 import mysql.connector
 from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
-import datetime
+from datetime import datetime
 import pandas as pd
 import numpy as np
 from sklearn.ensemble import RandomForestRegressor
@@ -132,7 +132,7 @@ def add_product():
 
     try:
         # Decode the token to get the user ID
-        decoded_token = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
+        decoded_token = jwt.decode(token, app.secret_key, algorithms=["HS256"])
         user_id = decoded_token['user_id']
 
         # Retrieve and validate input data
@@ -169,7 +169,7 @@ def add_product():
 
         # Insert product data into `sample_150_with_product_names` (without units_sold)
         query_150 = """
-            INSERT INTO sample_150_with_product_names 
+            INSERT INTO sample_150_test_with_product_names 
             (record_ID, week, store_id, sku_id, product_name, total_price, base_price, 
             is_featured_sku, is_display_sku) 
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
@@ -199,23 +199,31 @@ def add_product():
     
 @app.route('/api/graph-demand-data', methods=['GET'])
 def graph_demand_data():
+    sku = request.args.get('sku')
+    if not sku:
+        return jsonify({'error': 'SKU ID is required'}), 400
+
     global model_trained
     if not model_trained or not os.path.exists(model_path):
         return jsonify({'error': 'Model not trained yet'})
 
-    model = joblib.load(model_path)
-    le = joblib.load('label_encoder.pkl')
-
     try:
+        model = joblib.load(model_path)
+        le = joblib.load('label_encoder.pkl')
+
         conn = mysql.connector.connect(**db_config)
         cursor = conn.cursor(dictionary=True)
-
-        cursor.execute("SELECT * FROM sample_150_test_with_product_names")
+        cursor.execute("SELECT * FROM sample_150_test_with_product_names WHERE sku_id = %s", (sku,))
         rows = cursor.fetchall()
-        df = pd.DataFrame(rows)
+        conn.close()
 
-        # Prepare data
+        df = pd.DataFrame(rows)
+        if df.empty:
+            return jsonify([])
+
         df['week'] = pd.to_datetime(df['week'], format='%y/%m/%d')
+        today = datetime.today()
+        df = df[df['week'] > today]
         df['week_number'] = df['week'].dt.isocalendar().week
         df['year'] = df['week'].dt.year
         df['product_name_encoded'] = le.transform(df['product_name'])
@@ -225,7 +233,6 @@ def graph_demand_data():
             'base_price', 'is_featured_sku', 'is_display_sku', 'product_name_encoded'
         ]
         X_pred = df[features]
-
         predictions = model.predict(X_pred)
         df['predicted_units_sold'] = predictions.round(2)
         df['week'] = df['week'].dt.strftime('%Y-%m-%d')
@@ -236,23 +243,50 @@ def graph_demand_data():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+
 @app.route('/api/graph-sales-history', methods=['GET'])
 def graph_sales_history():
+    sku = request.args.get('sku')
+    if not sku:
+        return jsonify({'error': 'SKU ID is required'}), 400
+
     try:
         conn = mysql.connector.connect(**db_config)
         cursor = conn.cursor(dictionary=True)
 
-        cursor.execute("SELECT week, units_sold FROM sample_500_with_product_names")
+        cursor.execute("""
+            SELECT week, units_sold 
+            FROM sample_500_with_product_names
+            WHERE sku_id = %s
+        """, (sku,))
         rows = cursor.fetchall()
-        df = pd.DataFrame(rows)
+        conn.close()
 
-        # Prepare data
+        df = pd.DataFrame(rows)
+        if df.empty:
+            return jsonify([])
+
         df['week'] = pd.to_datetime(df['week'], format='%y/%m/%d')
+        cutoff_date = datetime.strptime("2025-01-01", "%Y-%m-%d")
+        df = df[df['week'] <= cutoff_date]
         df['week'] = df['week'].dt.strftime('%Y-%m-%d')
+        
 
         response = df.groupby('week').sum().reset_index()
         return jsonify(response.to_dict(orient='records'))
 
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/products')
+def get_products():
+    try:
+        conn = mysql.connector.connect(**db_config)
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT DISTINCT sku_id, product_name FROM sample_500_with_product_names ORDER BY product_name")
+        rows = cursor.fetchall()
+        conn.close()
+        return jsonify(rows)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

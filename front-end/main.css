@@ -29,6 +29,10 @@ body {
     margin-bottom: 20px;
 }
 
+h3{
+margin:10px;
+}
+
 .sidebar .profile .avatar {
     width: 80px;
     height: 80px;
@@ -117,6 +121,7 @@ body {
 
 .btn-primary {
     padding: 10px 20px;
+    margin: 10px;
     background-color: #27ae60;
     color: white;
     border: none;
@@ -207,4 +212,40 @@ body {
 
 .add-product-form .btn-primary:hover {
     background-color: #219150;
+}
+
+.graph-section {
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 4rem;
+    align-items: center;
+    background-color: #f8f9fa;
+}
+
+.graph-container {
+    width: 90%;
+    max-width: 800px;
+    background: white;
+    padding: 1.5rem;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    border-radius: 12px;
+}
+
+.graph-container h2 {
+    text-align: center;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+
+.analytics-controls {
+    margin: 2rem auto;
+    text-align: center;
+}
+
+.analytics-controls select {
+    padding: 0.5rem;
+    font-size: 1rem;
+    border-radius: 8px;
 }

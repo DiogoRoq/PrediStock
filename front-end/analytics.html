@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - PrediStock</title>
     <link rel="stylesheet" href="main.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="JavaScript/analytics.js"></script>
 </head>
 <body>
@@ -22,14 +23,36 @@
         </aside>
         <main class="main-content">
             <div class="top-buttons">
-                <button class="action-button active" id="btn-relatórios">Relatórios</button>
-                <button class="action-button" id="btn-histórico">Histórico de Movimentação</button>
+                <button class="btn-primary">Reports</button>
+                <button class="btn-primary">Sales History</button>
             </div>
             <h3>Train Demand Forecasting Model</h3>
-            <button onclick="trainModel()">Train Model</button>
+            <button class="btn-primary" onclick="trainModel()">Train Model</button>
             <p id="train-status"></p>
+            <div class="analytics-controls">
+    <label for="productSelect">Select a Product:</label>
+    <select id="productSelect">
+        <option value="">-- Choose a product --</option>
+    </select>
+</div>
+
+<section id="chartsSection" style="display: none;">
+    <div class="graph-container">
+        <h2>Sales History</h2>
+        <canvas id="salesChart"></canvas>
+    </div>
+
+    <div class="graph-container">
+        <h2>Demand Prediction</h2>
+        <canvas id="demandChart"></canvas>
+    </div>
+</section>
+
         </main>
     </div>
+    
+
+
     <script>
 function trainModel() {
     fetch('http://127.0.0.1:5000/train-model', { method: 'POST' })
@@ -43,5 +66,71 @@ function trainModel() {
     });
 }
 </script>
+<script>
+async function fetchProductList() {
+    const res = await fetch("http://127.0.0.1:5000/api/products");
+    return await res.json(); // expected: [{ sku_id: "123", product_name: "Shampoo" }, ...]
+}
+
+async function fetchGraphData(endpoint, sku) {
+    const res = await fetch(`${endpoint}?sku=${encodeURIComponent(sku)}`);
+    return await res.json();
+}
+
+function renderLineChart(canvasId, labels, values, labelText) {
+    const ctx = document.getElementById(canvasId);
+    if (ctx.chart) ctx.chart.destroy(); // Destroy old chart if exists
+    ctx.chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: labelText,
+                data: values,
+                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: { y: { beginAtZero: true } }
+        }
+    });
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+    const productSelect = document.getElementById("productSelect");
+    const chartsSection = document.getElementById("chartsSection");
+
+    // Load and populate product list
+    const products = await fetchProductList();
+    products.forEach(p => {
+        const option = document.createElement("option");
+        option.value = p.sku_id;
+        option.textContent = `${p.product_name} (SKU ${p.sku_id})`;
+        productSelect.appendChild(option);
+    });
+
+    productSelect.addEventListener("change", async () => {
+        const sku = productSelect.value;
+        if (!sku) {
+            chartsSection.style.display = "none";
+            return;
+        }
+
+        const sales = await fetchGraphData("http://127.0.0.1:5000/api/graph-sales-history", sku);
+        const demand = await fetchGraphData("http://127.0.0.1:5000/api/graph-demand-data", sku);
+
+        chartsSection.style.display = "block";
+        renderLineChart("salesChart", sales.map(d => d.week), sales.map(d => d.units_sold), "Units Sold");
+        renderLineChart("demandChart", demand.map(d => d.week), demand.map(d => d.predicted_units_sold), "Predicted Demand");
+    });
+});
+</script>
+
+
+
 </body>
 </html>
