@@ -5,52 +5,55 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestão de Produtos</title>
     <link rel="stylesheet" href="main.css">
-    <script src="js/5gestao_produtos.js"></script>
 </head>
 <body>
     <div class="dashboard-container">
-        <!-- Barra Lateral -->
+        <!-- Sidebar -->
         <aside class="sidebar">
             <div class="profile">
                 <img src="imagem-usuario.png" alt="Foto de Perfil" class="avatar">
+                <p>Usuário</p>
             </div>
             <nav class="menu">
-                <button class="menu-item" onclick="location.href='4dashbroard.html'">Dashboard Principal</button>
-                <button class="menu-item" onclick="location.href='5gestao_produtos.html'">Gestão de Produtos</button>
-                <button class="menu-item" onclick="location.href='6previsao_procura.html'">Previsão de Procura</button>
-                <button class="menu-item" onclick="location.href='7relatorios_historicos.html'">Relatórios e Estatísticas</button>
+                <button class="menu-item active" onclick="location.href='dashboard.html'">Dashboard Principal</button>
+                <button class="menu-item" onclick="location.href='inventoryManagement.html'">Gestão de Produtos</button>
+                <button class="menu-item" onclick="location.href='demandPrediction.html'">Previsão de Procura</button>
+                <button class="menu-item" onclick="location.href='analytics.html'">Relatórios e Estatísticas</button>
             </nav>
         </aside>
 
-        <!-- Painel Principal -->
+        <!-- Main Content -->
         <main class="dashboard-content">
             <header class="dashboard-header">
-                <div class="header-buttons">
-                    <button class="tab-button">Pesquisa</button>
-                </div>
                 <div class="search-container">
-                    <input type="text" placeholder="Pesquisar produto...">
+                    <input type="text" placeholder="Pesquisar produto..." class="search-input">
+                    <button class="search-btn">Pesquisa</button>
                 </div>
             </header>
 
             <section class="product-management">
                 <div class="actions">
-                    <button class="add-btn" onclick="abrirModal()">Adicionar</button>
-                    <button class="remove-btn" onclick="removerProduto()">Remover</button>
+                    <!-- Updated Adicionar Button -->
+                    <button class="add-btn" onclick="location.href='addProductForm.html'">Adicionar</button>
                 </div>
-
                 <table class="product-table">
                     <thead>
                         <tr>
-                            <th>NOME</th>
-                            <th>DESCRIÇÃO</th>
-                            <th>PREÇO</th>
-                            <th>QUANTIDADE</th>
-                            <th>CATEGORIA</th>
+                            <th>Nome</th>
+                            <th>Descrição</th>
+                            <th>Preço</th>
+                            <th>Quantidade</th>
+                            <th>Categoria</th>
                         </tr>
                     </thead>
                     <tbody id="tabela-produtos">
-                        <tr><td>Produto A</td><td>Descrição</td><td>10.00</td><td>5</td><td>Categoria 1</td></tr>
+                        <tr>
+                            <td>Produto A</td>
+                            <td>Descrição</td>
+                            <td>10.00</td>
+                            <td>5</td>
+                            <td>Categoria 1</td>
+                        </tr>
                     </tbody>
                 </table>
             </section>

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adicionar Produto</title>
+    <link rel="stylesheet" href="main.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="profile">
+                <img src="imagem-usuario.png" alt="Foto de Perfil" class="avatar">
+                <p>Usuário</p>
+            </div>
+            <nav class="menu">
+                <button class="menu-item" onclick="location.href='dashboard.html'">Dashboard Principal</button>
+                <button class="menu-item active" onclick="location.href='inventoryManagement.html'">Gestão de Produtos</button>
+                <button class="menu-item" onclick="location.href='demandPrediction.html'">Previsão de Procura</button>
+                <button class="menu-item" onclick="location.href='analytics.html'">Relatórios e Estatísticas</button>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="dashboard-content">
+            <header class="dashboard-header">
+                <h1>Adicionar Produto</h1>
+            </header>
+            <section class="form-section">
+                <form id="addProductForm" onsubmit="addProduct(event)">
+                    <div class="form-group">
+                        <label for="record_ID">Record ID:</label>
+                        <input type="text" id="record_ID" name="record_ID" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="store_id">Store ID:</label>
+                        <input type="text" id="store_id" name="store_id" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="sku_id">SKU ID:</label>
+                        <input type="text" id="sku_id" name="sku_id" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="product_name">Product Name:</label>
+                        <input type="text" id="product_name" name="product_name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="total_price">Total Price:</label>
+                        <input type="number" step="0.01" id="total_price" name="total_price" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="base_price">Base Price:</label>
+                        <input type="number" step="0.01" id="base_price" name="base_price" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="units_sold">Units Sold (in the last week):</label>
+                        <input type="number" id="units_sold" name="units_sold" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="is_featured_sku">Is Featured SKU:</label>
+                        <input type="checkbox" id="is_featured_sku" name="is_featured_sku">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="is_display_sku">Is Display SKU:</label>
+                        <input type="checkbox" id="is_display_sku" name="is_display_sku">
+                    </div>
+
+                    <button type="submit" class="submit-btn">Adicionar Produto</button>
+                </form>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        async function addProduct(event) {
+            event.preventDefault();
+
+            const formData = {
+                record_ID: document.getElementById("record_ID").value,
+                store_id: document.getElementById("store_id").value,
+                sku_id: document.getElementById("sku_id").value,
+                product_name: document.getElementById("product_name").value,
+                total_price: parseFloat(document.getElementById("total_price").value),
+                base_price: parseFloat(document.getElementById("base_price").value),
+                units_sold: parseInt(document.getElementById("units_sold").value),
+                is_featured_sku: document.getElementById("is_featured_sku").checked ? 1 : 0,
+                is_display_sku: document.getElementById("is_display_sku").checked ? 1 : 0,
+            };
+
+            const token = "your_jwt_token"; // Replace this with the actual JWT token
+
+            try {
+                const response = await fetch("/api/add-product", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(formData),
+                });
+
+                const result = await response.json();
+                if (response.ok) {
+                    alert(result.message);
+                    location.href = "inventoryManagement.html"; // Redirect back to inventory page
+                } else {
+                    alert(result.error);
+                }
+            } catch (error) {
+                alert("An error occurred: " + error.message);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - PrediStock</title>
     <link rel="stylesheet" href="main.css">
-    <script src="js/7relatorios_historicos.js"></script>
+    <script src="JavaScript/analytics.js"></script>
 </head>
 <body>
     <div class="dashboard-container">
@@ -14,16 +14,16 @@
                 <img src="imagem-usuario.png" alt="Foto de Perfil" class="avatar">
             </div>
             <nav class="menu">
-                <button class="menu-item" onclick="location.href='4dashbroard.html'">Dashboard Principal</button>
-                <button class="menu-item" onclick="location.href='5gestao_produtos.html'">Gestão de Produtos</button>
-                <button class="menu-item" onclick="location.href='6previsao_procura.html'">Previsão de Procura</button>
-                <button class="menu-item" onclick="location.href='7relatorios_historicos.html'">Relatórios e Estatísticas</button>
+                <button class="menu-item" onclick="location.href='dashboard.html'">Dashboard Principal</button>
+                <button class="menu-item" onclick="location.href='inventoryManagement.html'">Gestão de Produtos</button>
+                <button class="menu-item" onclick="location.href='demandPrediction.html'">Previsão de Procura</button>
+                <button class="menu-item" onclick="location.href='analytics.html'">Relatórios e Estatísticas</button>
             </nav>
         </aside>
         <main class="main-content">
             <div class="top-buttons">
-                <button class="action-button active" id="btn-relatorios">Relatórios</button>
-                <button class="action-button" id="btn-historico">Histórico de Movimentação</button>
+                <button class="action-button active" id="btn-relatórios">Relatórios</button>
+                <button class="action-button" id="btn-histórico">Histórico de Movimentação</button>
             </div>
             <h3>Train Demand Forecasting Model</h3>
             <button onclick="trainModel()">Train Model</button>
