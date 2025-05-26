@@ -291,6 +291,23 @@ def get_products():
         return jsonify({'error': str(e)}), 500
 
 
+@app.route('/api/inventory')
+def get_inventory():
+    try:
+        conn = mysql.connector.connect(**db_config)
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT sku_id, product_name, units_sold, base_price, total_price, week, store_id
+            FROM sample_500_with_product_names
+            ORDER BY product_name
+        """)
+        rows = cursor.fetchall()
+        conn.close()
+        return jsonify(rows)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
 def get_db_connection():
     return mysql.connector.connect(**db_config)
 

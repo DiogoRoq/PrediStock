@@ -8,6 +8,7 @@
 </head>
 <body>
     <div class="dashboard-container">
+        
         <!-- Sidebar -->
         <aside class="sidebar">
             <div class="profile">
@@ -21,39 +22,91 @@
                 <button class="menu-item" onclick="location.href='analytics.html'">Relatórios e Estatísticas</button>
             </nav>
         </aside>
+
         <!-- Main Content -->
         <main class="dashboard-content">
             <div class="content-header">
                 <h2>Gestão de Produtos</h2>
                 <p>Gerencie seus produtos abaixo.</p>
             </div>
+
             <div class="inventory-actions">
                 <input type="text" placeholder="Pesquisar produto..." class="search-input">
                 <button class="btn-primary" onclick="location.href='addProductForm.html'">Adicionar</button>
             </div>
+
             <div class="inventory-table">
                 <table>
                     <thead>
                         <tr>
-                            <th>Nome</th>
-                            <th>Descrição</th>
-                            <th>Preço</th>
-                            <th>Quantidade</th>
-                            <th>Categoria</th>
+                            <th>SKU ID</th>
+                            <th>Nome do Produto</th>
+                            <th>Unidades Vendidas</th>
+                            <th>Preço Base</th>
+                            <th>Preço Total</th>
+                            <th>Semana</th>
+                            <th>ID Loja</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>Produto A</td>
-                            <td>Descrição</td>
-                            <td>10.00</td>
-                            <td>5</td>
-                            <td>Categoria 1</td>
-                        </tr>
+                        <!-- JavaScript will insert rows here -->
                     </tbody>
                 </table>
             </div>
         </main>
     </div>
+
+    <script>
+document.addEventListener('DOMContentLoaded', function () {
+    let allData = [];
+
+    const tbody = document.querySelector('tbody');
+    const searchInput = document.querySelector('.search-input');
+
+    function renderTable(data) {
+        tbody.innerHTML = '';
+
+        if (!data || data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7">Nenhum produto encontrado.</td></tr>';
+            return;
+        }
+
+        data.forEach(item => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${item.sku_id || '-'}</td>
+                <td>${item.product_name || '-'}</td>
+                <td>${item.units_sold || '-'}</td>
+                <td>${item.base_price || '-'}</td>
+                <td>${item.total_price || '-'}</td>
+                <td>${item.week || '-'}</td>
+                <td>${item.store_id || '-'}</td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+
+    fetch('http://localhost:5000/api/inventory')
+        .then(response => response.json())
+        .then(data => {
+            allData = data;
+            renderTable(allData);
+        })
+        .catch(error => {
+            console.error('Erro ao buscar os dados:', error);
+        });
+
+    searchInput.addEventListener('input', function () {
+        const query = this.value.toLowerCase();
+
+        const filtered = allData.filter(item =>
+            (item.product_name || '').toLowerCase().includes(query)
+        );
+
+        renderTable(filtered);
+    });
+});
+</script>
+
 </body>
 </html>
