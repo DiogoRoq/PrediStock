@@ -100,6 +100,37 @@ function renderLineChart(canvasId, labels, values, labelText) {
     });
 }
 
+function renderBarChart(canvasId, labels, values, labelText) {
+    const ctx = document.getElementById(canvasId);
+    if (ctx.chart) ctx.chart.destroy(); // Destroy old chart if exists
+    ctx.chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: labelText,
+                data: values,
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                x: {
+                    barPercentage: 0.2,         
+                    categoryPercentage: 1
+                },
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+
 document.addEventListener("DOMContentLoaded", async () => {
     const productSelect = document.getElementById("productSelect");
     const chartsSection = document.getElementById("chartsSection");
@@ -125,7 +156,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         chartsSection.style.display = "block";
         renderLineChart("salesChart", sales.map(d => d.week), sales.map(d => d.units_sold), "Units Sold");
-        renderLineChart("demandChart", demand.map(d => d.week), demand.map(d => d.predicted_units_sold), "Predicted Demand");
+        renderBarChart("demandChart", demand.map(d => d.week), demand.map(d => d.predicted_units_sold), "Predicted Demand");
     });
 });
 </script>

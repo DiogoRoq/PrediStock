@@ -145,7 +145,7 @@ def add_product():
         units_sold = int(data.get('units_sold', 0))
         is_featured_sku = 1 if data.get('is_featured_sku', False) else 0
         is_display_sku = 1 if data.get('is_display_sku', False) else 0
-        week = datetime.datetime.now().strftime('%d/%m/%y')  # Default to current date
+        week = datetime.now().strftime('%d/%m/%y')  # Default to current date
 
         # Validation for required fields
         if not all([record_id, store_id, sku_id, product_name]) or total_price <= 0 or base_price <= 0:
@@ -351,7 +351,7 @@ def login():
         if user and check_password_hash(user['password_hash'], password):
             token = jwt.encode({
                 'user_id': user['id'],
-                'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=24)
+                'exp': datetime.utcnow() + datetime.timedelta(hours=24)
             }, app.secret_key, algorithm='HS256')
             return jsonify({'status': 'success', 'token': token})
         return jsonify({'status': 'error', 'message': 'Invalid credentials'}), 401
