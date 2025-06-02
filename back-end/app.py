@@ -3,7 +3,7 @@ from flask_cors import CORS
 import mysql.connector
 from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 import pandas as pd
 import numpy as np
 from sklearn.ensemble import RandomForestRegressor
@@ -351,7 +351,7 @@ def login():
         if user and check_password_hash(user['password_hash'], password):
             token = jwt.encode({
                 'user_id': user['id'],
-                'exp': datetime.utcnow() + datetime.timedelta(hours=24)
+                'exp': datetime.now(timezone.utc) + timedelta(hours=24)
             }, app.secret_key, algorithm='HS256')
             return jsonify({'status': 'success', 'token': token})
         return jsonify({'status': 'error', 'message': 'Invalid credentials'}), 401
