@@ -1,20 +1,164 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register - PrediStock</title>
-    <link rel="stylesheet" href="main.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Register – PrediStock</title>
+
+  <style>
+    /* 1) Page‐wide background and base typography */
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #0B132B;          /* Oxford Blue */
+      font-family: Inter, sans-serif;
+      color: #FFFFFF;                      /* Default text color (white) */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    /* 2) The centered “card” container */
+    .register-card {
+      background-color: #1C2541;           /* Space Cadet */
+      border-radius: 16px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+      padding: 40px 24px;
+      width: 100%;
+      max-width: 400px;
+      box-sizing: border-box;
+    }
+
+    /* 3) Form heading */
+    .register-card h2 {
+      margin: 0;
+      margin-bottom: 24px;
+      font-size: 1.5rem;                   /* approx. text-2xl */
+      font-weight: 700;
+      text-align: center;
+      color: #FFFFFF;                      /* White text on dark card */
+    }
+
+    /* 4) Form fields (labels + inputs) */
+    .register-card label {
+      display: block;
+      font-size: 0.875rem;                 /* approx. text-sm */
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.75);    /* semi‐transparent white */
+      margin-bottom: 6px;
+    }
+
+    .register-card input[type="text"],
+    .register-card input[type="email"],
+    .register-card input[type="password"] {
+      width: 100%;
+      padding: 12px 16px;
+      font-size: 1rem;
+      border: 2px solid #0B132B;           /* Oxford Blue border */
+      border-radius: 8px;
+      background-color: #FFFFFF;           /* white input background */
+      color: #0B132B;                      /* navy text inside input */
+      box-sizing: border-box;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+    .register-card input[type="text"]:focus,
+    .register-card input[type="email"]:focus,
+    .register-card input[type="password"]:focus {
+      border-color: #5BC0BE;               /* Verdigris focus ring */
+    }
+
+    /* 5) “Already have an account?” text */
+    .login-prompt {
+      text-align: center;
+      font-size: 0.875rem;
+      color: rgba(255, 255, 255, 0.75);
+      margin-top: 16px;
+    }
+    .login-prompt a {
+      color: #5BC0BE;                      /* Verdigris link */
+      text-decoration: none;
+      transition: opacity 0.2s ease;
+    }
+    .login-prompt a:hover {
+      opacity: 0.8;
+    }
+
+    /* 6) Register (submit) button */
+    .register-button {
+      width: 100%;
+      padding: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      background-color: #5BC0BE;           /* Verdigris */
+      color: #FFFFFF;                      /* White text on teal */
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      transition: background-color 0.2s ease;
+      margin-top: 24px;
+    }
+    .register-button:hover {
+      background-color: #4aa49b;           /* Slightly darker teal */
+    }
+  </style>
 </head>
+
 <body>
-    <div class="wrapper">
-        <form id="registerForm">
-    <input type="text" id="username" required>
-    <input type="email" id="email" required>
-    <input type="password" id="password" required>
-    <button type="submit">Register</button>
-</form>
+  <div class="register-card">
+    <h2>Create Your Account</h2>
+
+    <form id="registerForm">
+      <!-- Full Name -->
+      <div style="margin-bottom: 16px;">
+        <label for="fullName">Full Name</label>
+        <input
+          type="text"
+          id="fullName"
+          name="fullName"
+          required
+          placeholder="Your full name"
+        />
+      </div>
+
+      <!-- Email -->
+      <div style="margin-bottom: 16px;">
+        <label for="email">Email</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          required
+          placeholder="you@example.com"
+        />
+      </div>
+
+      <!-- Password -->
+      <div style="margin-bottom: 16px;">
+        <label for="password">Password</label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          required
+          placeholder="••••••••"
+        />
+      </div>
+
+      <!-- Submit button -->
+      <button type="submit" class="register-button">Register</button>
+    </form>
+
+    <!-- Already have an account? -->
+    <div class="login-prompt">
+      Already have an account?
+      <a href="login.html">Log In</a>
     </div>
-    <script src="JavaScript/register.js"></script>  
+  </div>
+
+  <!-- Your existing JavaScript (register logic) -->
+  <script src="JavaScript/register.js"></script>
 </body>
 </html>

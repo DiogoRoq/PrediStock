@@ -1,34 +1,297 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
-    <link rel="stylesheet" href="main.css">
-    <script defer src="JavaScript/dashboard.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dashboard – PrediStock</title>
+
+  <style>
+    /* === PALETTE VARIABLES === */
+    :root {
+      --color-bg: #0B132B;       /* Oxford Blue */
+      --color-header: #1C2541;   /* Space Cadet */
+      --color-card: #3A506B;     /* YInMn Blue */
+      --color-hover: #5BC0BE;    /* Verdigris */
+      --color-white: #FFFFFF;
+    }
+
+    /* 1) Reset + base */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background-color: var(--color-bg);
+      color: var(--color-white);
+      font-family: Inter, sans-serif;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* 2) Header bar */
+    .header-bar {
+      background-color: var(--color-header);
+      height: 60px;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 100;
+    }
+    .header-title {
+      display: flex;
+      align-items: center;
+      font-size: 1.25rem;   /* ~text-xl */
+      font-weight: 700;
+    }
+    .header-logo {
+      height: 32px;
+      width: auto;
+      margin-right: 12px;
+    }
+
+    /* 3) User Menu container */
+    .user-menu {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .user-menu button {
+      background: none;
+      border: none;
+      color: var(--color-white);
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+    }
+    .user-menu button:focus {
+      outline: none;
+    }
+    .user-menu button::after {
+      content: "▾";
+      margin-left: 6px;
+      font-size: 0.7rem;
+    }
+
+    /* 4) Dropdown content (hidden by default) */
+    .dropdown {
+      display: none;            /* hidden until JS toggles “show” */
+      position: absolute;
+      right: 0;
+      top: 100%;
+      background-color: var(--color-header);
+      border: 1px solid #2A3A4A;  /* slightly darker border */
+      border-radius: 6px;
+      margin-top: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+      white-space: nowrap;
+      z-index: 200;
+    }
+    .dropdown.show {
+      display: block;           /* shown when JS adds “show” */
+    }
+    /* Style for the Logout button inside the dropdown */
+    #logoutLink {
+      background: none;
+      border: none;
+      color: var(--color-white);
+      font-size: 0.9rem;
+      padding: 10px 16px;
+      text-align: left;
+      width: 100%;
+      cursor: pointer;
+    }
+    #logoutLink:hover {
+      background-color: rgba(91, 192, 190, 0.2); /* translucent Verdigris */
+    }
+
+    /* 5) Push content down below the fixed header */
+    .content-wrapper {
+      margin-top: 60px; /* same as header height */
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-bottom: 40px;
+    }
+
+    /* 6) Optional page heading */
+    .page-heading {
+      margin-top: 32px;
+      margin-bottom: 16px;
+      font-size: 1.5rem;   /* ~text-2xl */
+      font-weight: 700;
+      text-align: center;
+    }
+
+    /* 7) Bento grid */
+    .bento-container {
+      display: grid;
+      grid-template-columns: repeat(2, 260px);
+      grid-gap: 16px;               /* smaller gap */
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* 8) Tile‐style buttons */
+    .bento-button {
+      background-color: var(--color-card);
+      border-radius: 12px;
+      text-decoration: none;
+      color: var(--color-white);
+      width: 260px;
+      height: 260px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      transition: background-color 0.2s ease, transform 0.1s ease;
+    }
+    .bento-button:hover {
+      background-color: var(--color-hover);
+      transform: translateY(-4px);
+    }
+    .bento-button:active {
+      transform: translateY(-2px);
+    }
+
+    /* 9) Icon styling */
+    .bento-button .icon {
+      width: 64px;
+      height: 64px;
+      margin-bottom: 16px;
+      fill: var(--color-white);
+    }
+
+    /* 10) Label styling */
+    .bento-button .label {
+      font-size: 1.1rem; /* ~text-lg */
+      font-weight: 600;
+      text-align: center;
+    }
+  </style>
 </head>
+
 <body>
-    <div class="dashboard-container">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="profile">
-                <img src="imagem-usuario.png" alt="Icon" class="avatar">
-                <p class="username">Usuário</p>
-            </div>
-            <nav class="menu">
-                <button class="menu-item active-section" onclick="location.href='dashboard.html'">Dashboard Principal</button>
-                <button class="menu-item" onclick="location.href='inventoryManagement.html'">Gestão de Produtos</button>
-                <button class="menu-item" onclick="location.href='demandPrediction.html'">Previsão de Procura</button>
-                <button class="menu-item" onclick="location.href='analytics.html'">Relatórios e Estatísticas</button>
-            </nav>
-        </aside>
-        <!-- Main Content -->
-        <main class="dashboard-content">
-            <div class="content-header">
-                <h2>Bem-vindo ao Dashboard!</h2>
-                <p>Escolha uma opção no menu lateral.</p>
-            </div>
-        </main>
+  <!-- ===== HEADER BAR ===== -->
+  <div class="header-bar">
+    <div class="header-title">
+      PrediStock
     </div>
+
+    <div class="user-menu">
+      <!-- Start as “Loading…”—JS will replace with the real username -->
+      <button id="userButton">Loading…</button>
+
+      <div id="userDropdown" class="dropdown">
+        <button id="logoutLink">Logout</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <div class="content-wrapper">
+    <div class="page-heading">Welcome to PrediStock Dashboard</div>
+
+    <div class="bento-container">
+      <!-- Inventory Management -->
+      <a href="inventoryManagement.html" class="bento-button">
+        <svg class="icon" viewBox="0 0 24 24">
+          <path d="M3 7v13h18V7H3zm16 11H5v-9h14v9zm-5-13h-2V2h2v3zM7 4h2V2H7v2zm8 0h2V2h-2v2z" />
+        </svg>
+        <div class="label">Inventory</div>
+      </a>
+
+      <!-- Add Product -->
+      <a href="addProductForm.html" class="bento-button">
+        <svg class="icon" viewBox="0 0 24 24">
+          <path d="M19 13H13v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+        </svg>
+        <div class="label">Add Product</div>
+      </a>
+
+      <!-- Analytics -->
+      <a href="analytics.html" class="bento-button">
+        <svg class="icon" viewBox="0 0 24 24">
+          <path d="M3 17h2V9H3v8zm4 0h2V3H7v14zm4 0h2V5h-2v12zm4 0h2V1h-2v16zm4 0h2v-6h-2v6z" />
+        </svg>
+        <div class="label">Analytics</div>
+      </a>
+
+      <!-- Demand Prediction -->
+      <a href="demandPrediction.html" class="bento-button">
+        <svg class="icon" viewBox="0 0 24 24">
+          <path d="M3 17l6-6 4 4 8-8v10H3z" />
+        </svg>
+        <div class="label">Demand Forecast</div>
+      </a>
+    </div>
+  </div>
+
+  <!-- ===== JAVASCRIPT FOR DYNAMIC USERNAME & DROPDOWN & LOGOUT ===== -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const userButton   = document.getElementById('userButton');
+      const userDropdown = document.getElementById('userDropdown');
+      const logoutLink   = document.getElementById('logoutLink');
+
+      // 1) Fetch the current user's info from your Flask API
+      fetch('http://127.0.0.1:5000/api/current_user', {
+        headers: {
+          'Authorization': 'Bearer ' + localStorage.getItem('jwtToken')
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (!data.logged_in) {
+          // If not logged in, redirect back to login.html
+          window.location = 'http://127.0.0.1:5500/front-end/login.html';
+          return;
+        }
+        // Otherwise, set the actual username in the button
+        userButton.textContent = data.username;
+      })
+      .catch(err => {
+        console.error('Error fetching current user:', err);
+        window.location = 'http://127.0.0.1:5500/front-end/login.html';
+      });
+
+      // 2) Toggle dropdown on click of the username button
+      userButton.addEventListener('click', function (e) {
+        e.stopPropagation();
+        userDropdown.classList.toggle('show');
+      });
+
+      // 3) Hide dropdown if clicking outside
+      document.addEventListener('click', function () {
+        if (userDropdown.classList.contains('show')) {
+          userDropdown.classList.remove('show');
+        }
+      });
+
+      // 4) Prevent clicks inside the dropdown from closing it immediately
+      userDropdown.addEventListener('click', function (e) {
+        e.stopPropagation();
+      });
+
+      // 5) When "Logout" is clicked:
+      logoutLink.addEventListener('click', function () {
+        // Remove the JWT from localStorage
+        localStorage.removeItem('jwtToken');
+        // Redirect to the static login page
+        window.location = 'http://127.0.0.1:5500/front-end/login.html';
+      });
+    });
+  </script>
 </body>
 </html>

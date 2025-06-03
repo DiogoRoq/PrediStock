@@ -1,167 +1,459 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - PrediStock</title>
-    <link rel="stylesheet" href="main.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="JavaScript/analytics.js"></script>
-</head>
-<body>
-    <div class="dashboard-container">
-        <aside class="sidebar">
-            <div class="user-profile">
-                <img src="imagem-usuario.png" alt="Foto de Perfil" class="avatar">
-            </div>
-            <nav class="menu">
-                <button class="menu-item" onclick="location.href='dashboard.html'">Dashboard Principal</button>
-                <button class="menu-item" onclick="location.href='inventoryManagement.html'">Gestão de Produtos</button>
-                <button class="menu-item" onclick="location.href='demandPrediction.html'">Previsão de Procura</button>
-                <button class="menu-item" onclick="location.href='analytics.html'">Relatórios e Estatísticas</button>
-            </nav>
-        </aside>
-        <main class="main-content">
-            <div class="top-buttons">
-                <button class="btn-primary">Reports</button>
-                <button class="btn-primary">Sales History</button>
-            </div>
-            <h3>Train Demand Forecasting Model</h3>
-            <button class="btn-primary" onclick="trainModel()">Train Model</button>
-            <p id="train-status"></p>
-            <div class="analytics-controls">
-    <label for="productSelect">Select a Product:</label>
-    <select id="productSelect">
-        <option value="">-- Choose a product --</option>
-    </select>
-</div>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Relatórios e Estatísticas – PrediStock</title>
 
-<section id="chartsSection" style="display: none;">
-    <div class="graph-container">
+  <!-- Chart.js CDN (as before) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    /* === PALETTE VARIABLES === */
+    :root {
+      --color-bg: #0B132B;       /* Oxford Blue */
+      --color-header: #1C2541;   /* Space Cadet */
+      --color-card: #3A506B;     /* YInMn Blue */
+      --color-hover: #5BC0BE;    /* Verdigris */
+      --color-white: #FFFFFF;
+      --sidebar-width: 200px;
+    }
+
+    /* ===== RESET & BASE ===== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background-color: var(--color-bg);
+      color: var(--color-white);
+      font-family: Inter, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+    button, input, select {
+      font-family: Inter, sans-serif;
+    }
+
+    /* ===== HEADER BAR ===== */
+    .header-bar {
+      background-color: var(--color-header);
+      height: 60px;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 100;
+    }
+    .header-title {
+      display: flex;
+      align-items: center;
+      font-size: 1.25rem;   /* ~text-xl */
+      font-weight: 700;
+    }
+    .header-logo {
+      height: 32px;
+      width: auto;
+      margin-right: 12px;
+    }
+    /* User menu (username + dropdown) */
+    .user-menu {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .user-menu button {
+      background: none;
+      border: none;
+      color: var(--color-white);
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+    }
+    .user-menu button:focus {
+      outline: none;
+    }
+    .user-menu button::after {
+      content: "▾";
+      margin-left: 6px;
+      font-size: 0.7rem;
+    }
+    .dropdown {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: 100%;
+      background-color: var(--color-header);
+      border: 1px solid #2A3A4A;
+      border-radius: 6px;
+      margin-top: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+      white-space: nowrap;
+      z-index: 200;
+    }
+    .dropdown.show {
+      display: block;
+    }
+    .dropdown button {
+      background: none;
+      border: none;
+      color: var(--color-white);
+      font-size: 0.9rem;
+      padding: 10px 16px;
+      width: 100%;
+      text-align: left;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+    .dropdown button:hover {
+      background-color: rgba(91, 192, 190, 0.2);
+    }
+
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      position: fixed;
+      top: 60px; /* below header */
+      left: 0;
+      width: var(--sidebar-width);
+      height: calc(100% - 60px);
+      background-color: var(--color-header);
+      padding-top: 16px;
+      box-shadow: 2px 0 6px rgba(0, 0, 0, 0.3);
+      overflow-y: auto;
+      z-index: 50;
+    }
+    .sidebar ul {
+      list-style: none;
+    }
+    .sidebar li {
+      margin-bottom: 12px;
+    }
+    .sidebar a {
+      display: block;
+      padding: 10px 16px;
+      color: var(--color-white);
+      font-size: 1rem;
+      transition: background-color 0.2s ease;
+    }
+    .sidebar a:hover {
+      background-color: var(--color-card);
+    }
+    .sidebar a.active {
+      background-color: var(--color-hover);
+      font-weight: 600;
+    }
+
+    /* ===== CONTENT WRAPPER ===== */
+    .content-wrapper {
+      margin-top: 60px; /* below header */
+      margin-left: var(--sidebar-width);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 24px;
+      color: var(--color-white);
+    }
+
+    /* ===== PAGE HEADING ===== */
+    .page-heading {
+      font-size: 1.5rem; /* ~text-2xl */
+      font-weight: 700;
+      margin-bottom: 24px;
+      text-align: center;
+      color: var(--color-white);
+    }
+
+    /* ===== TOP CONTROLS ===== */
+    .top-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+      justify-content: space-between;
+    }
+    .top-controls .btn-primary {
+      background-color: var(--color-hover);
+      border: none;
+      border-radius: 8px;
+      color: var(--color-white);
+      padding: 10px 16px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s ease, transform 0.1s ease;
+    }
+    .top-controls .btn-primary:hover {
+      background-color: #4fa39f;
+      transform: translateY(-2px);
+    }
+    .top-controls .btn-primary:active {
+      transform: translateY(-1px);
+    }
+    .top-controls label {
+      font-size: 0.9rem;
+      margin-right: 8px;
+    }
+    .top-controls select {
+      padding: 6px 10px;
+      font-size: 0.9rem;
+      border-radius: 6px;
+      border: 1px solid var(--color-bg);
+      background-color: var(--color-white);
+      color: var(--color-bg);
+      cursor: pointer;
+      outline: none;
+    }
+
+    /* ===== CHART CONTAINERS ===== */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    .graph-container {
+      background-color: var(--color-card);
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+    .graph-container h2 {
+      margin-bottom: 12px;
+      font-size: 1.125rem; /* ~text-lg */
+      text-align: center;
+      color: var(--color-white);
+    }
+    .graph-container canvas {
+      width: 100% !important;
+      height: auto !important;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- ===== HEADER BAR ===== -->
+  <div class="header-bar">
+    <div class="header-title">
+
+      PrediStock
+    </div>
+    <div class="user-menu">
+      <button id="userButton">Loading…</button>
+      <div id="userDropdown" class="dropdown">
+        <button id="logoutLink">Logout</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SIDEBAR ===== -->
+  <nav class="sidebar">
+    <ul>
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="inventoryManagement.html">Inventory</a></li>
+      <li><a href="addProductForm.html">Add Product</a></li>
+      <li><a href="analytics.html" class="active">Analytics</a></li>
+      <li><a href="demandPrediction.html">Demand Forecast</a></li>
+    </ul>
+  </nav>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <div class="content-wrapper">
+    <div class="page-heading">Graphs - Sales / Demand</div>
+
+    <!-- Top controls: Train Model & Product selector -->
+   <div class="top-controls">
+    <button class="btn-primary" onclick="trainModel()">Train Model</button>
+    <!-- Status message for model training -->
+    <div id="trainStatus" style="margin-left:16px; font-size:0.95rem; color:var(--color-white);">
+      &nbsp;
+    </div>
+    <div class="product-select-container">
+      <label for="productSelect">Select a Product:</label>
+      <select id="productSelect">
+        <option value="">----</option>
+      </select>
+    </div>
+  </div>
+
+    <!-- Two charts side by side -->
+    <section id="chartsSection" style="display: none;" class="charts-grid">
+      <div class="graph-container">
         <h2>Sales History</h2>
         <canvas id="salesChart"></canvas>
-    </div>
-
-    <div class="graph-container">
+      </div>
+      <div class="graph-container">
         <h2>Demand Prediction</h2>
         <canvas id="demandChart"></canvas>
-    </div>
-</section>
+      </div>
+    </section>
+  </div>
 
-        </main>
-    </div>
-    
+  <!-- ===== JAVASCRIPT ===== -->
+  <script>
+    // 1) Fetch current user & set up dropdown/logout
+    document.addEventListener("DOMContentLoaded", () => {
+      const userButton = document.getElementById("userButton");
+      const userDropdown = document.getElementById("userDropdown");
+      const logoutLink = document.getElementById("logoutLink");
 
+      fetch("http://127.0.0.1:5000/api/current_user", {
+        headers: {
+          "Authorization": "Bearer " + localStorage.getItem("jwtToken")
+        }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (!data.logged_in) {
+          window.location = "http://127.0.0.1:5500/front-end/login.html";
+          return;
+        }
+        userButton.textContent = data.username;
+      })
+      .catch(err => {
+        console.error("Error fetching user:", err);
+        window.location = "http://127.0.0.1:5500/front-end/login.html";
+      });
 
-    <script>
-function trainModel() {
-    fetch('http://127.0.0.1:5000/train-model', { method: 'POST' })
-    .then(res => res.json())
-    .then(data => {
-      const status = data.status === 'success' ? '✅ ' + data.message : '❌ ' + data.message;
-      document.getElementById('train-status').innerText = status;
-    })
-    .catch(err => {
-      document.getElementById('train-status').innerText = 'Error: ' + err;
+      userButton.addEventListener("click", e => {
+        e.stopPropagation();
+        userDropdown.classList.toggle("show");
+      });
+      document.addEventListener("click", () => {
+        userDropdown.classList.remove("show");
+      });
+      userDropdown.addEventListener("click", e => e.stopPropagation());
+      logoutLink.addEventListener("click", () => {
+        localStorage.removeItem("jwtToken");
+        window.location = "http://127.0.0.1:5500/front-end/login.html";
+      });
     });
-}
-</script>
-<script>
-async function fetchProductList() {
-    const res = await fetch("http://127.0.0.1:5000/api/products");
-    return await res.json(); // expected: [{ sku_id: "123", product_name: "Shampoo" }, ...]
-}
 
-async function fetchGraphData(endpoint, sku) {
-    const res = await fetch(`${endpoint}?sku=${encodeURIComponent(sku)}`);
-    return await res.json();
-}
+    // 2) Training model endpoint
+    function trainModel() {
+      fetch("http://127.0.0.1:5000/train-model", { method: "POST" })
+        .then(res => res.json())
+        .then(data => {
+          const statusText = data.status === "success"
+            ? "✅ " + data.message
+            : "❌ " + data.message;
+          alert(statusText);
+        })
+        .catch(err => {
+          alert("Error training model: " + err);
+        });
+    }
 
-function renderLineChart(canvasId, labels, values, labelText) {
-    const ctx = document.getElementById(canvasId);
-    if (ctx.chart) ctx.chart.destroy(); // Destroy old chart if exists
-    ctx.chart = new Chart(ctx, {
-        type: 'line',
+    // 3) Chart population
+    async function fetchProductList() {
+      const res = await fetch("http://127.0.0.1:5000/api/products");
+      return await res.json();
+    }
+    async function fetchGraphData(endpoint, sku) {
+      const res = await fetch(`${endpoint}?sku=${encodeURIComponent(sku)}`);
+      return await res.json();
+    }
+    function renderLineChart(canvasId, labels, values, labelText) {
+      const ctx = document.getElementById(canvasId);
+      if (ctx.chart) ctx.chart.destroy();
+      ctx.chart = new Chart(ctx, {
+        type: "line",
         data: {
-            labels: labels,
-            datasets: [{
-                label: labelText,
-                data: values,
-                borderColor: 'rgba(75, 192, 192, 1)',
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                fill: true,
-                tension: 0.4
-            }]
+          labels,
+          datasets: [{
+            label: labelText,
+            data: values,
+            borderColor: "rgba(75, 192, 192, 1)",
+            backgroundColor: "rgba(75, 192, 192, 0.2)",
+            fill: true,
+            tension: 0.4
+          }]
         },
         options: {
-            responsive: true,
-            scales: { y: { beginAtZero: true } }
+          responsive: true,
+          scales: { y: { beginAtZero: true } }
         }
-    });
-}
-
-function renderBarChart(canvasId, labels, values, labelText) {
-    const ctx = document.getElementById(canvasId);
-    if (ctx.chart) ctx.chart.destroy(); // Destroy old chart if exists
-    ctx.chart = new Chart(ctx, {
-        type: 'bar',
+      });
+    }
+    function renderBarChart(canvasId, labels, values, labelText) {
+      const ctx = document.getElementById(canvasId);
+      if (ctx.chart) ctx.chart.destroy();
+      ctx.chart = new Chart(ctx, {
+        type: "bar",
         data: {
-            labels: labels,
-            datasets: [{
-                label: labelText,
-                data: values,
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                borderColor: 'rgba(75, 192, 192, 1)',
-                borderWidth: 1
-            }]
+          labels,
+          datasets: [{
+            label: labelText,
+            data: values,
+            backgroundColor: "rgba(75, 192, 192, 0.2)",
+            borderColor: "rgba(75, 192, 192, 1)",
+            borderWidth: 1
+          }]
         },
         options: {
-            responsive: true,
-            scales: {
-                x: {
-                    barPercentage: 0.2,         
-                    categoryPercentage: 1
-                },
-                y: {
-                    beginAtZero: true
-                }
-            }
+          responsive: true,
+          scales: {
+            x: { barPercentage: 0.2, categoryPercentage: 1 },
+            y: { beginAtZero: true }
+          }
         }
-    });
-}
+      });
+    }
 
+    // 4) On page load: populate product dropdown and set event handler
+    document.addEventListener("DOMContentLoaded", async () => {
+      const productSelect = document.getElementById("productSelect");
+      const chartsSection = document.getElementById("chartsSection");
 
-document.addEventListener("DOMContentLoaded", async () => {
-    const productSelect = document.getElementById("productSelect");
-    const chartsSection = document.getElementById("chartsSection");
-
-    // Load and populate product list
-    const products = await fetchProductList();
-    products.forEach(p => {
+      // Load products
+      const products = await fetchProductList();
+      products.forEach(p => {
         const option = document.createElement("option");
         option.value = p.sku_id;
         option.textContent = `${p.product_name} (SKU ${p.sku_id})`;
         productSelect.appendChild(option);
-    });
+      });
 
-    productSelect.addEventListener("change", async () => {
+      // When a product is selected:
+      productSelect.addEventListener("change", async () => {
         const sku = productSelect.value;
         if (!sku) {
-            chartsSection.style.display = "none";
-            return;
+          chartsSection.style.display = "none";
+          return;
         }
 
+        // Fetch data for each chart
         const sales = await fetchGraphData("http://127.0.0.1:5000/api/graph-sales-history", sku);
         const demand = await fetchGraphData("http://127.0.0.1:5000/api/graph-demand-data", sku);
 
-        chartsSection.style.display = "block";
-        renderLineChart("salesChart", sales.map(d => d.week), sales.map(d => d.units_sold), "Units Sold");
-        renderBarChart("demandChart", demand.map(d => d.week), demand.map(d => d.predicted_units_sold), "Predicted Demand");
+        // Show charts section and render
+        chartsSection.style.display = "grid";
+        renderLineChart(
+          "salesChart",
+          sales.map(d => d.week),
+          sales.map(d => d.units_sold),
+          "Units Sold"
+        );
+        renderBarChart(
+          "demandChart",
+          demand.map(d => d.week),
+          demand.map(d => d.predicted_units_sold),
+          "Predicted Demand"
+        );
+      });
     });
-});
-</script>
-
-
-
+  </script>
 </body>
 </html>

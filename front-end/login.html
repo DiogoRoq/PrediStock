@@ -1,41 +1,195 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - PrediStock</title>
-    <link rel="stylesheet" href="main.css">
-</head>
-<body>
-    <div class="wrapper">
-        <form id="loginForm">
-            <h2>Welcome To PrediStock</h2>
-            <div class="input-field">
-                <input type="email" id="email" placeholder=" " required>
-                <label for="email">Email</label>
-            </div>    
-            <div class="input-field">
-                <input type="password" id="password" placeholder=" " required>
-                <label for="password">Enter your password</label>
-                <span class="password-toggle"><i class="fa fa-eye-slash"></i></span>
-            </div>                      
-            <div class="forget">
-                <label for="remember">
-                    <input type="checkbox" id="remember">
-                    <p>Remember me</p>
-                </label>
-                <a href="forgotPassword.html">Forgot password?</a>
-            </div>    
-            <button type="submit">Log in</button>
-            <div class="register">
-                <p>
-                    Don't have an account?
-                    <a href="register.html">Register</a>
-                </p>
-            </div>
-        </form>
-    </div>    
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Login – PrediStock</title>
 
-    <script src="JavaScript/login.js"></script>
+  <style>
+    /* 1) Page‐wide background and base typography */
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #0B132B;          /* Oxford Blue */
+      font-family: Inter, sans-serif;
+      color: #FFFFFF;                      /* Default text as white on navy */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    /* 2) The centered “card” container */
+    .login-card {
+      background-color: #1C2541;           /* Space Cadet */
+      border-radius: 16px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+      padding: 40px 24px;
+      width: 100%;
+      max-width: 400px;
+      box-sizing: border-box;
+    }
+
+    /* 3) Form heading */
+    .login-card h2 {
+      margin: 0;
+      margin-bottom: 24px;
+      font-size: 1.5rem;                   /* approx. text-2xl */
+      font-weight: 700;
+      text-align: center;
+      color: #FFFFFF;                      /* White text on dark card */
+    }
+
+    /* 4) Form fields (labels + inputs) */
+    .login-card label {
+      display: block;
+      font-size: 0.875rem;                 /* approx. text-sm */
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.75);    /* semi‐transparent white */
+      margin-bottom: 6px;
+    }
+
+    .login-card input[type="email"],
+    .login-card input[type="password"] {
+      width: 100%;
+      padding: 12px 16px;
+      font-size: 1rem;
+      border: 2px solid #0B132B;           /* Oxford Blue border */
+      border-radius: 8px;
+      background-color: #FFFFFF;           /* white input background */
+      color: #0B132B;                      /* navy text inside input */
+      box-sizing: border-box;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+    .login-card input[type="email"]:focus,
+    .login-card input[type="password"]:focus {
+      border-color: #5BC0BE;               /* Verdigris focus ring */
+    }
+
+    /* 5) “Remember me” + “Forgot password?” row */
+    .login-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 12px;
+      margin-bottom: 24px;
+    }
+    .login-footer label {
+      display: flex;
+      align-items: center;
+      font-size: 0.875rem;
+      color: rgba(255, 255, 255, 0.75);
+    }
+    .login-footer input[type="checkbox"] {
+      margin: 0 6px 0 0;
+      width: 16px;
+      height: 16px;
+      accent-color: #5BC0BE;              /* Verdigris check color */
+      border: 2px solid #FFFFFF;          /* white border */
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .login-footer a {
+      font-size: 0.875rem;
+      color: #5BC0BE;                      /* Verdigris link */
+      text-decoration: none;
+      transition: opacity 0.2s ease;
+    }
+    .login-footer a:hover {
+      opacity: 0.8;
+    }
+
+    /* 6) Log in button */
+    .login-button {
+      width: 100%;
+      padding: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      background-color: #5BC0BE;           /* Verdigris */
+      color: #FFFFFF;                      /* White text on teal */
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      transition: background-color 0.2s ease;
+    }
+    .login-button:hover {
+      background-color: #4aa49b;           /* Slightly darker teal */
+    }
+
+    /* 7) “Register” link below the button */
+    .register-link {
+      text-align: center;
+      margin-top: 16px;
+    }
+    .register-link a {
+      font-size: 0.875rem;
+      color: #5BC0BE;                      /* Verdigris */
+      text-decoration: none;
+      transition: opacity 0.2s ease;
+    }
+    .register-link a:hover {
+      opacity: 0.8;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="login-card">
+    <h2>Welcome to PrediStock</h2>
+
+    <form id="loginForm">
+      <!-- Email -->
+      <div style="margin-bottom: 16px;">
+        <label for="email">Email</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          required
+          placeholder="you@example.com"
+        />
+      </div>
+
+      <!-- Password -->
+      <div style="margin-bottom: 4px; position: relative;">
+        <label for="password">Password</label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          required
+          placeholder="••••••••"
+          style="margin-top: 6px;"
+        />
+        <!-- (Optional) eye icon placeholder if you add JS later -->
+        <!-- <span style="position:absolute; top: 42px; right: 16px; color: rgba(0,0,0,0.3); cursor:pointer;">
+             <i class="fa fa-eye-slash"></i>
+           </span> -->
+      </div>
+
+      <!-- Remember + Forgot row -->
+      <div class="login-footer">
+        <label for="remember">
+          <input type="checkbox" id="remember" name="remember" />
+          Remember me
+        </label>
+        <a href="forgotPassword.html">Forgot password?</a>
+      </div>
+
+      <!-- Log in button -->
+      <button type="submit" class="login-button">Log in</button>
+    </form>
+
+    <!-- Register link below -->
+    <div class="register-link">
+      Don’t have an account?
+      <a href="register.html">Register</a>
+    </div>
+  </div>
+
+  <!-- Keep your existing JS logic here (login.js) -->
+  <script src="JavaScript/login.js"></script>
 </body>
 </html>

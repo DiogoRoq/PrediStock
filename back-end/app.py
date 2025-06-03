@@ -1,5 +1,5 @@
-from flask import Flask, request, jsonify
-from flask_cors import CORS
+from flask import Flask, Response, render_template, request, session, redirect, url_for, jsonify  # <-- add session, redirect, url_for
+from flask_cors import CORS, cross_origin
 import mysql.connector
 from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
@@ -29,7 +29,8 @@ model_trained = False
 
 
 
-@app.route('/train-model', methods=['POST'])
+@app.route('/train-model', methods=['POST', 'OPTIONS'])
+@cross_origin(origins="*", supports_credentials=True)
 def train_model_from_db():
     global model_trained
     try:
@@ -337,8 +338,23 @@ def register():
         cursor.close()
         conn.close()
 
-@app.route('/login', methods=['POST'])
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return Response(
+        response="<script>window.location='http://127.0.0.1:5500/front-end/login.html';</script>",
+        status=200,
+        mimetype="text/html"
+    )
+
+
+@app.route('/login', methods=['POST', 'OPTIONS'])
+@cross_origin(origins="*", supports_credentials=True)
 def login():
+    if request.method == 'OPTIONS':
+        return '', 200
+
     data = request.json
     email = data.get('email')
     password = data.get('password')
@@ -403,6 +419,48 @@ def reset_password():
     finally:
         cursor.close()
         conn.close()
+
+@app.route('/api/current_user', methods=['GET'])
+def current_user():
+    """
+    Reads the JWT from the Authorization header (Bearer <token>), decodes it,
+    looks up the username in the database, and returns:
+      { "logged_in": false }   # if missing/invalid token
+      { "logged_in": true, "username": "<actual_username>" }
+    """
+    auth_header = request.headers.get('Authorization')
+    if not auth_header:
+        return jsonify({"logged_in": False}), 200
+
+    parts = auth_header.split()
+    if len(parts) != 2 or parts[0].lower() != 'bearer':
+        return jsonify({"logged_in": False}), 200
+
+    token = parts[1]
+    try:
+        data = jwt.decode(token, app.secret_key, algorithms=['HS256'])
+        user_id = data.get('user_id')
+        if not user_id:
+            return jsonify({"logged_in": False}), 200
+
+        # Look up the username by user_id
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT username FROM users WHERE id = %s", (user_id,))
+        row = cursor.fetchone()
+        cursor.close()
+        conn.close()
+
+        if row and row.get('username'):
+            return jsonify({"logged_in": True, "username": row['username']}), 200
+    except jwt.ExpiredSignatureError:
+        return jsonify({"logged_in": False}), 200
+    except jwt.InvalidTokenError:
+        return jsonify({"logged_in": False}), 200
+    except Exception:
+        return jsonify({"logged_in": False}), 200
+
+    return jsonify({"logged_in": False}), 200
 
 
 if __name__ == '__main__':

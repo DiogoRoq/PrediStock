@@ -1,101 +1,564 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Previsão de Procura</title>
-    <link rel="stylesheet" href="main.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="JavaScript/demandPrediction.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Demand Forecast – PrediStock</title>
+
+  <!-- Chart.js (kept in case you extend with graphs later) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    /* === PALETTE VARIABLES === */
+    :root {
+      --color-bg: #0B132B;        /* Oxford Blue */
+      --color-header: #1C2541;    /* Space Cadet */
+      --color-card: #3A506B;      /* YInMn Blue */
+      --color-hover: #5BC0BE;     /* Verdigris */
+      --color-white: #FFFFFF;
+      --color-gray-light: #E5E7EB;
+      --color-gray-medium: #6B7280;
+      --sidebar-width: 200px;
+    }
+
+    /* ===== RESET & BASE ===== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background-color: var(--color-bg);
+      color: var(--color-white);
+      font-family: Inter, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+    button, input, select {
+      font-family: Inter, sans-serif;
+    }
+
+    /* ===== HEADER BAR ===== */
+    .header-bar {
+      background-color: var(--color-header);
+      height: 60px;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 100;
+    }
+    .header-title {
+      display: flex;
+      align-items: center;
+      font-size: 1.25rem;   /* ~text-xl */
+      font-weight: 700;
+    }
+    .header-logo {
+      height: 32px;
+      width: auto;
+      margin-right: 12px;
+    }
+    /* User menu (username + dropdown) */
+    .user-menu {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .user-menu button {
+      background: none;
+      border: none;
+      color: var(--color-white);
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+    }
+    .user-menu button:focus {
+      outline: none;
+    }
+    .user-menu button::after {
+      content: "▾";
+      margin-left: 6px;
+      font-size: 0.7rem;
+    }
+    .dropdown {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: 100%;
+      background-color: var(--color-header);
+      border: 1px solid #2A3A4A;
+      border-radius: 6px;
+      margin-top: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+      white-space: nowrap;
+      z-index: 200;
+    }
+    .dropdown.show {
+      display: block;
+    }
+    .dropdown button {
+      background: none;
+      border: none;
+      color: var(--color-white);
+      font-size: 0.9rem;
+      padding: 10px 16px;
+      width: 100%;
+      text-align: left;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+    .dropdown button:hover {
+      background-color: rgba(91, 192, 190, 0.2);
+    }
+
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      position: fixed;
+      top: 60px; /* below header */
+      left: 0;
+      width: var(--sidebar-width);
+      height: calc(100% - 60px);
+      background-color: var(--color-header);
+      padding-top: 16px;
+      box-shadow: 2px 0 6px rgba(0, 0, 0, 0.3);
+      overflow-y: auto;
+      z-index: 50;
+    }
+    .sidebar ul {
+      list-style: none;
+    }
+    .sidebar li {
+      margin-bottom: 12px;
+    }
+    .sidebar a {
+      display: block;
+      padding: 10px 16px;
+      color: var(--color-white);
+      font-size: 1rem;
+      transition: background-color 0.2s ease;
+    }
+    .sidebar a:hover {
+      background-color: var(--color-card);
+    }
+    .sidebar a.active {
+      background-color: var(--color-hover);
+      font-weight: 600;
+    }
+
+    /* ===== CONTENT WRAPPER ===== */
+    .content-wrapper {
+      margin-top: 60px; /* below header */
+      margin-left: var(--sidebar-width);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 24px;
+      color: var(--color-white);
+    }
+
+    /* ===== PAGE HEADING ===== */
+    .page-heading {
+      font-size: 1.5rem; /* ~text-2xl */
+      font-weight: 700;
+      margin-bottom: 24px;
+      text-align: center;
+      color: var(--color-white);
+    }
+
+    /* ===== CONTROL CARD ===== */
+    .control-card {
+      background-color: var(--color-card);
+      border-radius: 8px;
+      padding: 24px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      margin-bottom: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .control-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .control-row .left-group,
+    .control-row .right-group {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .control-row .right-group {
+      margin-left: auto;
+    }
+
+    /* Buttons inside control card */
+    .control-card button {
+      background-color: var(--color-hover);
+      border: none;
+      border-radius: 8px;
+      color: var(--color-white);
+      padding: 10px 16px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s ease, transform 0.1s ease;
+    }
+    .control-card button:hover {
+      background-color: #4fa39f;
+      transform: translateY(-2px);
+    }
+    .control-card button:active {
+      transform: translateY(-1px);
+    }
+
+    /* Model status text */
+    #model-status {
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Train Status Message */
+    #trainStatus {
+      font-size: 0.95rem;
+      color: var(--color-white);
+    }
+
+    /* ===== SEARCH INPUT ===== */
+    .search-container {
+      display: flex;
+      align-items: center;
+    }
+    .search-container input[type="text"] {
+      width: 300px;
+      padding: 8px 12px;
+      font-size: 1rem;
+      border: 2px solid var(--color-bg);
+      border-radius: 6px;
+      background-color: var(--color-white);
+      color: var(--color-bg);
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+    .search-container input[type="text"]:focus {
+      border-color: var(--color-hover);
+    }
+    .search-container input[type="text"]:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* ===== RESULTS CARD ===== */
+    .results-card {
+      background-color: var(--color-card);
+      border-radius: 8px;
+      padding: 24px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      flex: 1; /* let results fill remaining vertical space if needed */
+    }
+    .results-card h3 {
+      margin-bottom: 12px;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--color-white);
+    }
+    .table-container {
+      max-height: 100%; /* limit height, scroll if overflow */
+      overflow-y: auto;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    thead {
+      background-color: var(--color-header);
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+    th, td {
+      padding: 12px 16px;
+      text-align: left;
+      font-size: 0.9rem;
+      color: var(--color-white);
+      white-space: nowrap;
+    }
+    th {
+      font-weight: 600;
+    }
+    tbody tr:nth-child(even) {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+    tbody tr:nth-child(odd) {
+      background-color: rgba(255, 255, 255, 0.03);
+    }
+    tbody tr:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+  </style>
 </head>
+
 <body>
-    <div class="dashboard-container">
-        <aside class="sidebar">
-            <div class="profile">
-                <img src="imagem-usuario.png" alt="Icon" class="avatar">
-            </div>
-            <nav class="menu">
-                <button class="menu-item" onclick="location.href='dashboard.html'">Dashboard Principal</button>
-                <button class="menu-item" onclick="location.href='inventoryManagement.html'">Gestão de Produtos</button>
-                <button class="menu-item" onclick="location.href='demandPrediction.html'">Previsão de Procura</button>
-                <button class="menu-item" onclick="location.href='analytics.html'">Relatórios e Estatísticas</button>
-            </nav>
-        </aside>
-        <div class="dashboard-content">
-            <h3>Model Status: <span id="model-status">Loading...</span></h3>
-            <button class="btn-primary" onclick="predictDemand()">Predict Demand</button>
-            <p id="prediction-note" style="font-style: italic; color: #555; margin-top: 20px;">
-                🔍 The predicted demand represents <strong>weekly sales per product</strong> based on current stock.
-            </p>
-            
-            <div id="prediction-results"></div>
-        </div>
+  <!-- ===== HEADER BAR ===== -->
+  <div class="header-bar">
+    <div class="header-title">
+      PrediStock
     </div>
-</body>
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-  checkModelStatus();
-});
+    <div class="user-menu">
+      <button id="userButton">Loading…</button>
+      <div id="userDropdown" class="dropdown">
+        <button id="logoutLink">Logout</button>
+      </div>
+    </div>
+  </div>
 
-function checkModelStatus() {
-  fetch('http://127.0.0.1:5000/model-status')
-    .then(res => res.json())
-    .then(data => {
-      const status = data.trained ? "✅ Trained" : "❌ Not Trained";
-      document.getElementById('model-status').innerText = status;
-    })
-    .catch(err => {
-      console.error("Error checking model status:", err);
-      document.getElementById('model-status').innerText = '⚠️ Error';
-    });
-}
+  <!-- ===== SIDEBAR ===== -->
+  <nav class="sidebar">
+    <ul>
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="inventoryManagement.html">Inventory</a></li>
+      <li><a href="addProductForm.html">Add Product</a></li>
+      <li><a href="analytics.html">Analytics</a></li>
+      <li><a href="demandPrediction.html" class="active">Demand Forecast</a></li>
+    </ul>
+  </nav>
 
-function predictDemand() {
-  fetch('http://127.0.0.1:5000/predict-demand')
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Network response was not OK');
-      }
-      return response.json();
-    })
-    .then(data => {
-      const container = document.getElementById('prediction-results');
+  <!-- ===== MAIN CONTENT ===== -->
+  <div class="content-wrapper">
+    <div class="page-heading">Demand Forecast</div>
 
-      if (data.error) {
-        container.innerHTML = `<p style="color:red;">Error: ${data.error}</p>`;
-        return;
-      }
+    <!-- ===== CONTROL CARD ===== -->
+    <div class="control-card">
+      <!-- Row 1: Model Status & Train Model -->
+      <div class="control-row">
+        <div class="left-group">
+          <div id="model-status">
+            <!-- Filled by JS (✅ or ❌) -->
+            <span>Model Status:</span>
+            <span>⏳ Loading…</span>
+          </div>
+        </div>
+        <div class="right-group">
+          <button onclick="trainModel()">Train Model</button>
+          <div id="trainStatus">&nbsp;</div>
+        </div>
+      </div>
 
-      if (!Array.isArray(data) || data.length === 0) {
-        container.innerHTML = `<p>No predictions returned.</p>`;
-        return;
-      }
+      <!-- Row 2: Predict Demand & Search -->
+      <div class="control-row">
+        <div class="left-group">
+          <button onclick="predictDemand()">Predict Demand</button>
+          <span id="prediction-note" style="font-style: italic; color: var(--color-gray-light);">
+            🔍 Predicted demand represents <strong>weekly sales per product</strong>.
+          </span>
+        </div>
+        <div class="right-group">
+          <div class="search-container">
+            <input
+              type="text"
+              id="searchInput"
+              placeholder="Search by product name..."
+              disabled
+            />
+          </div>
+        </div>
+      </div>
+    </div>
 
-      
-      const headers = ['product_name', 'predicted_units_sold'];
+    <!-- ===== RESULTS CARD ===== -->
+    <div class="results-card" id="resultsSection" style="display: none;">
+      <h3>Predicted Demand</h3>
+      <div class="table-container">
+        <table id="predictionTable">
+          <thead>
+            <tr>
+              <th>Product Name</th>
+              <th>Predicted Units Sold</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Rows injected by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 
-      let html = '<h3>Predicted Demand</h3><table border="1" cellpadding="5"><tr>';
-      headers.forEach(h => {
-        html += `<th>${h}</th>`;
+  <!-- ===== JAVASCRIPT ===== -->
+  <script>
+    let fullPredictions = []; // Will hold the array of all predictions
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const userButton   = document.getElementById("userButton");
+      const userDropdown = document.getElementById("userDropdown");
+      const logoutLink   = document.getElementById("logoutLink");
+      const trainStatus  = document.getElementById("trainStatus");
+      const searchInput  = document.getElementById("searchInput");
+
+  
+
+      // 2) Fetch current user to populate the username button
+      fetch("http://127.0.0.1:5000/api/current_user", {
+        headers: { "Authorization": "Bearer " + localStorage.getItem("jwtToken") }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (!data.logged_in) {
+          window.location = "http://127.0.0.1:5500/front-end/login.html";
+          return;
+        }
+        userButton.textContent = data.username;
+      })
+      .catch(err => {
+        console.error("Error fetching user:", err);
+        window.location = "http://127.0.0.1:5500/front-end/login.html";
       });
-      html += '</tr>';
 
-      data.forEach(row => {
-        html += '<tr>';
-        headers.forEach(h => {
-          html += `<td>${row[h]}</td>`;
+      userButton.addEventListener("click", e => {
+        e.stopPropagation();
+        userDropdown.classList.toggle("show");
+      });
+      document.addEventListener("click", () => {
+        userDropdown.classList.remove("show");
+      });
+      userDropdown.addEventListener("click", e => e.stopPropagation());
+      logoutLink.addEventListener("click", () => {
+        localStorage.removeItem("jwtToken");
+        window.location = "http://127.0.0.1:5500/front-end/login.html";
+      });
+
+      // 3) Check model status immediately
+      checkModelStatus();
+
+      // 4) Enable search filtering after prediction data arrives
+      searchInput.addEventListener("input", function () {
+        const q = this.value.toLowerCase();
+        const filtered = fullPredictions.filter(row =>
+          (row.product_name || "").toLowerCase().includes(q)
+        );
+        renderPredictionTable(filtered);
+      });
+    });
+
+    // Train Model (with persistent status)
+    async function trainModel() {
+
+      try {
+        const response = await fetch("http://127.0.0.1:5000/train-model", { method: "POST" });
+        const data = await response.json();
+
+        if (data.status === "success") {
+          const successMsg = "✅ " + data.message;
+          statusDiv.textContent = successMsg;
+          statusDiv.style.color = "var(--color-hover)";
+          localStorage.setItem("trainStatusMessage", successMsg);
+        } else {
+          const errorMsg = "❌ " + (data.message || "Error training model");
+          statusDiv.textContent = errorMsg;
+          statusDiv.style.color = "#FF6B6B";
+          localStorage.setItem("trainStatusMessage", errorMsg);
+        }
+      } catch (err) {
+        const networkMsg = "❌ Error training model: " + err.message;
+        statusDiv.textContent = networkMsg;
+        statusDiv.style.color = "#FF6B6B";
+        localStorage.setItem("trainStatusMessage", networkMsg);
+      }
+      // Refresh status indicator
+      checkModelStatus();
+    }
+
+    // Check model status and display in #model-status
+    function checkModelStatus() {
+      fetch("http://127.0.0.1:5000/model-status")
+        .then(res => res.json())
+        .then(data => {
+          const statusText = data.trained ? "✅ Trained" : "❌ Not Trained";
+          document.getElementById("model-status").innerText = statusText;
+        })
+        .catch(err => {
+          console.error("Error checking model status:", err);
+          document.getElementById("model-status").innerText = "⚠️ Error";
         });
-        html += '</tr>';
-      });
+    }
 
-      html += '</table>';
-      container.innerHTML = html;
-    })
-    .catch(err => {
-      console.error("Prediction request failed:", err);
-      document.getElementById('prediction-results').innerHTML =
-        `<p style="color:red;">Request failed: ${err}</p>`;
-    });
-}
-</script>
+    // Predict Demand and render results
+    function predictDemand() {
+      fetch("http://127.0.0.1:5000/predict-demand")
+        .then(response => {
+          if (!response.ok) throw new Error("Network response was not OK");
+          return response.json();
+        })
+        .then(data => {
+          const container = document.getElementById("resultsSection");
+          const searchInput = document.getElementById("searchInput");
+
+          if (data.error) {
+            container.style.display = "block";
+            container.querySelector("#predictionTable tbody").innerHTML =
+              `<tr><td colspan="2" style="color: #FF6B6B;">Error: ${data.error}</td></tr>`;
+            return;
+          }
+
+          if (!Array.isArray(data) || data.length === 0) {
+            container.style.display = "block";
+            container.querySelector("#predictionTable tbody").innerHTML =
+              `<tr><td colspan="2">No predictions returned.</td></tr>`;
+            return;
+          }
+
+          // Store for filtering
+          fullPredictions = data;
+
+          // Enable search now that data exists
+          searchInput.disabled = false;
+          searchInput.value = "";
+
+          // Show results card and render full table
+          container.style.display = "block";
+          renderPredictionTable(fullPredictions);
+        })
+        .catch(err => {
+          console.error("Prediction request failed:", err);
+          const container = document.getElementById("resultsSection");
+          container.style.display = "block";
+          container.querySelector("#predictionTable tbody").innerHTML =
+            `<tr><td colspan="2" style="color: #FF6B6B;">Request failed: ${err.message}</td></tr>`;
+        });
+    }
+
+    // Render the table rows for a given array of prediction objects
+    function renderPredictionTable(arr) {
+      const tbody = document.querySelector("#predictionTable tbody");
+      tbody.innerHTML = "";
+
+      arr.forEach(row => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${row.product_name || ""}</td>
+          <td>${row.predicted_units_sold != null ? row.predicted_units_sold : ""}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+  </script>
+</body>
 </html>

@@ -1,123 +1,443 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Adicionar Produto</title>
-    <link rel="stylesheet" href="main.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Adicionar Produto – PrediStock</title>
+
+  <style>
+    /* === PALETTE VARIABLES === */
+    :root {
+      --color-bg: #0B132B;       /* Oxford Blue */
+      --color-header: #1C2541;   /* Space Cadet */
+      --color-card: #3A506B;     /* YInMn Blue */
+      --color-hover: #5BC0BE;    /* Verdigris */
+      --color-white: #FFFFFF;
+      --sidebar-width: 200px;
+    }
+
+    /* ===== RESET & BASE ===== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background-color: var(--color-bg);
+      color: var(--color-white);
+      font-family: Inter, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+    button, input, select {
+      font-family: Inter, sans-serif;
+    }
+
+    /* ===== HEADER BAR ===== */
+    .header-bar {
+      background-color: var(--color-header);
+      height: 60px;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 100;
+    }
+    .header-title {
+      display: flex;
+      align-items: center;
+      font-size: 1.25rem;   /* ~text-xl */
+      font-weight: 700;
+    }
+    .header-logo {
+      height: 32px;
+      width: auto;
+      margin-right: 12px;
+    }
+    /* User menu (username + dropdown) */
+    .user-menu {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .user-menu button {
+      background: none;
+      border: none;
+      color: var(--color-white);
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+    }
+    .user-menu button:focus {
+      outline: none;
+    }
+    .user-menu button::after {
+      content: "▾";
+      margin-left: 6px;
+      font-size: 0.7rem;
+    }
+    .dropdown {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: 100%;
+      background-color: var(--color-header);
+      border: 1px solid #2A3A4A;
+      border-radius: 6px;
+      margin-top: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+      white-space: nowrap;
+      z-index: 200;
+    }
+    .dropdown.show {
+      display: block;
+    }
+    .dropdown button {
+      background: none;
+      border: none;
+      color: var(--color-white);
+      font-size: 0.9rem;
+      padding: 10px 16px;
+      width: 100%;
+      text-align: left;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+    .dropdown button:hover {
+      background-color: rgba(91, 192, 190, 0.2); /* translucent Verdigris */
+    }
+
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      position: fixed;
+      top: 60px; /* below header */
+      left: 0;
+      width: var(--sidebar-width);
+      height: calc(100% - 60px);
+      background-color: var(--color-header);
+      padding-top: 16px;
+      box-shadow: 2px 0 6px rgba(0, 0, 0, 0.3);
+      overflow-y: auto;
+    }
+    .sidebar ul {
+      list-style: none;
+    }
+    .sidebar li {
+      margin-bottom: 12px;
+    }
+    .sidebar a {
+      display: block;
+      padding: 10px 16px;
+      color: var(--color-white);
+      font-size: 1rem;
+      transition: background-color 0.2s ease;
+    }
+    .sidebar a:hover {
+      background-color: var(--color-card);
+    }
+    .sidebar a.active {
+      background-color: var(--color-hover);
+      font-weight: 600;
+    }
+
+    /* ===== CONTENT WRAPPER ===== */
+    .content-wrapper {
+      margin-top: 60px; /* below header */
+      margin-left: var(--sidebar-width);
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 24px;
+    }
+
+    /* ===== CARD FOR FORM ===== */
+    .card {
+      background-color: var(--color-card);
+      border-radius: 12px;
+      padding: 32px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+    .card h2 {
+      font-size: 1.5rem;   /* ~text-2xl */
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--color-white);
+      text-align: center;
+    }
+    .card p {
+      font-size: 0.9rem;
+      margin-bottom: 24px;
+      color: var(--color-gray-light);
+      text-align: center;
+    }
+
+    /* ===== FORM GROUPS ===== */
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 0.9rem;
+      margin-bottom: 6px;
+      color: var(--color-white);
+    }
+    .form-group input[type="text"],
+    .form-group input[type="number"] {
+      width: 100%;
+      padding: 10px 14px;
+      font-size: 1rem;
+      border: 2px solid var(--color-bg);
+      border-radius: 8px;
+      background-color: var(--color-white);
+      color: var(--color-bg);
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+    .form-group input[type="text"]:focus,
+    .form-group input[type="number"]:focus {
+      border-color: var(--color-hover);
+    }
+
+    /* ===== CHECKBOXES ===== */
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+    }
+    .checkbox-group input[type="checkbox"] {
+      margin-right: 8px;
+      width: 18px;
+      height: 18px;
+    }
+    .checkbox-group label {
+      font-size: 0.9rem;
+      color: var(--color-white);
+      cursor: pointer;
+    }
+
+    /* ===== SUBMIT BUTTON ===== */
+    .btn-primary {
+      display: block;
+      width: 100%;
+      padding: 12px 0;
+      background-color: var(--color-hover);
+      border: none;
+      border-radius: 8px;
+      color: var(--color-white);
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s ease, transform 0.1s ease;
+      margin-top: 16px;
+    }
+    .btn-primary:hover {
+      background-color: #4fa39f; /* slightly darker Verdigris */
+      transform: translateY(-2px);
+    }
+    .btn-primary:active {
+      transform: translateY(-1px);
+    }
+  </style>
 </head>
+
 <body>
-    <div class="dashboard-container">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="profile">
-                <img src="imagem-usuario.png" alt="Icon" class="avatar">
-                <p class="username">Usuário</p>
-            </div>
-            <nav class="menu">
-                <button class="menu-item" onclick="location.href='dashboard.html'">Dashboard Principal</button>
-                <button class="menu-item" onclick="location.href='inventoryManagement.html'">Gestão de Produtos</button>
-                <button class="menu-item" onclick="location.href='demandPrediction.html'">Previsão de Procura</button>
-                <button class="menu-item" onclick="location.href='analytics.html'">Relatórios e Estatísticas</button>
-            </nav>
-        </aside>
-        <!-- Main Content -->
-        <main class="dashboard-content">
-            <div class="content-header">
-                <h2>Adicionar Produto</h2>
-                <p>Preencha os detalhes do produto abaixo.</p>
-            </div>
-            <form class="add-product-form">
-                <div class="form-group">
-                    <label for="record-id">Record ID:</label>
-                    <input type="text" id="record-id" placeholder="Digite o Record ID">
-                </div>
-                <div class="form-group">
-                    <label for="store-id">Store ID:</label>
-                    <input type="text" id="store-id" placeholder="Digite o Store ID">
-                </div>
-                <div class="form-group">
-                    <label for="sku-id">SKU ID:</label>
-                    <input type="text" id="sku-id" placeholder="Digite o SKU ID">
-                </div>
-                <div class="form-group">
-                    <label for="product-name">Product Name:</label>
-                    <input type="text" id="product-name" placeholder="Digite o Nome do Produto">
-                </div>
-                <div class="form-group">
-                    <label for="total-price">Total Price:</label>
-                    <input type="text" id="total-price" placeholder="Digite o Preço Total">
-                </div>
-                <div class="form-group">
-                    <label for="base-price">Base Price:</label>
-                    <input type="text" id="base-price" placeholder="Digite o Preço Base">
-                </div>
-                <div class="form-group">
-                    <label for="units-sold">Units Sold (in the last week):</label>
-                    <input type="number" id="units-sold" placeholder="Digite as Unidades Vendidas">
-                </div>
-                <div class="form-group">
-                    <label for="is-featured-sku">
-                        <input type="checkbox" id="is-featured-sku">
-                        Is Featured SKU
-                    </label>
-                </div>
-                <div class="form-group">
-                    <label for="is-display-sku">
-                        <input type="checkbox" id="is-display-sku">
-                        Is Display SKU
-                    </label>
-                </div>
-                <button type="submit" class="btn-primary">Adicionar Produto</button>
-            </form>
-        </main>
+  <!-- ===== HEADER BAR ===== -->
+  <div class="header-bar">
+    <div class="header-title">
+      PrediStock
     </div>
 
-    <script>
-    document.querySelector(".add-product-form").addEventListener("submit", async (e) => {
+    <div class="user-menu">
+      <button id="userButton">Loading…</button>
+      <div id="userDropdown" class="dropdown">
+        <button id="logoutLink">Logout</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SIDEBAR ===== -->
+  <nav class="sidebar">
+    <ul>
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="inventoryManagement.html">Inventory</a></li>
+      <li><a href="addProductForm.html" class="active">Add Product</a></li>
+      <li><a href="analytics.html">Analytics</a></li>
+      <li><a href="demandPrediction.html">Demand Forecast</a></li>
+    </ul>
+  </nav>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <div class="content-wrapper">
+    <div class="card">
+      <h2>Add Product</h2>
+      <p>Fill the form below</p>
+
+      <form class="add-product-form">
+        <!-- Record ID -->
+        <div class="form-group">
+          <label for="record-id">Record ID:</label>
+          <input type="text" id="record-id" required>
+        </div>
+
+        <!-- Store ID -->
+        <div class="form-group">
+          <label for="store-id">Store ID:</label>
+          <input type="text" id="store-id"  required>
+        </div>
+
+        <!-- SKU ID -->
+        <div class="form-group">
+          <label for="sku-id">SKU ID:</label>
+          <input type="text" id="sku-id"  required>
+        </div>
+
+        <!-- Product Name -->
+        <div class="form-group">
+          <label for="product-name">Product Name:</label>
+          <input type="text" id="product-name"  required>
+        </div>
+
+        <!-- Total Price -->
+        <div class="form-group">
+          <label for="total-price">Total Price:</label>
+          <input type="text" id="total-price"  required>
+        </div>
+
+        <!-- Base Price -->
+        <div class="form-group">
+          <label for="base-price">Base Price:</label>
+          <input type="text" id="base-price"  required>
+        </div>
+
+        <!-- Units Sold -->
+        <div class="form-group">
+          <label for="units-sold">Units Sold last week:</label>
+          <input type="number" id="units-sold"  required>
+        </div>
+
+        <!-- Is Featured SKU -->
+        <div class="form-group checkbox-group">
+          <input type="checkbox" id="is-featured-sku">
+          <label for="is-featured-sku">Is Featured SKU</label>
+        </div>
+
+        <!-- Is Display SKU -->
+        <div class="form-group checkbox-group">
+          <input type="checkbox" id="is-display-sku">
+          <label for="is-display-sku">Is Display SKU</label>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="btn-primary">Add</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== JAVASCRIPT FOR DYNAMIC USERNAME, DROPDOWN, AND FORM SUBMIT ===== -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const userButton   = document.getElementById('userButton');
+      const userDropdown = document.getElementById('userDropdown');
+      const logoutLink   = document.getElementById('logoutLink');
+
+      // 1) Fetch current user’s info
+      fetch('http://127.0.0.1:5000/api/current_user', {
+        headers: {
+          'Authorization': 'Bearer ' + localStorage.getItem('jwtToken')
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (!data.logged_in) {
+          window.location = 'http://127.0.0.1:5500/front-end/login.html';
+          return;
+        }
+        userButton.textContent = data.username;
+      })
+      .catch(err => {
+        console.error('Error fetching current user:', err);
+        window.location = 'http://127.0.0.1:5500/front-end/login.html';
+      });
+
+      // 2) Toggle user dropdown
+      userButton.addEventListener('click', function (e) {
+        e.stopPropagation();
+        userDropdown.classList.toggle('show');
+      });
+      document.addEventListener('click', function () {
+        if (userDropdown.classList.contains('show')) {
+          userDropdown.classList.remove('show');
+        }
+      });
+      userDropdown.addEventListener('click', function (e) {
+        e.stopPropagation();
+      });
+
+      // 3) Logout clears JWT and redirects to login
+      logoutLink.addEventListener('click', function () {
+        localStorage.removeItem('jwtToken');
+        window.location = 'http://127.0.0.1:5500/front-end/login.html';
+      });
+
+      // 4) Handle “Adicionar Produto” form submission
+      document.querySelector('.add-product-form').addEventListener('submit', async (e) => {
         e.preventDefault();
 
         const formData = {
-            record_ID: document.getElementById("record-id").value,
-            store_id: document.getElementById("store-id").value,
-            sku_id: document.getElementById("sku-id").value,
-            product_name: document.getElementById("product-name").value,
-            total_price: parseFloat(document.getElementById("total-price").value),
-            base_price: parseFloat(document.getElementById("base-price").value),
-            units_sold: parseInt(document.getElementById("units-sold").value),
-            is_featured_sku: document.getElementById("is-featured-sku").checked ? 1 : 0,
-            is_display_sku: document.getElementById("is-display-sku").checked ? 1 : 0,
+          record_ID: document.getElementById('record-id').value,
+          store_id: document.getElementById('store-id').value,
+          sku_id: document.getElementById('sku-id').value,
+          product_name: document.getElementById('product-name').value,
+          total_price: parseFloat(document.getElementById('total-price').value),
+          base_price: parseFloat(document.getElementById('base-price').value),
+          units_sold: parseInt(document.getElementById('units-sold').value, 10),
+          is_featured_sku: document.getElementById('is-featured-sku').checked ? 1 : 0,
+          is_display_sku: document.getElementById('is-display-sku').checked ? 1 : 0
         };
 
-        const token = localStorage.getItem("jwtToken");
+        const token = localStorage.getItem('jwtToken');
         if (!token) {
-            alert("You are not logged in!");
-            window.location.href = "login.html";
-            return;
+          alert('Você não está logado!');
+          window.location.href = 'login.html';
+          return;
         }
-
 
         try {
-            const response = await fetch("http://127.0.0.1:5000/api/add-product", {
-                method: "POST",
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(formData),
-            });
+          const response = await fetch('http://127.0.0.1:5000/api/add-product', {
+            method: 'POST',
+            headers: {
+              'Authorization': 'Bearer ' + token,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+          });
 
-            const result = await response.json();
-            if (response.ok) {
-                alert(result.message);
-                location.href = "inventoryManagement.html";
-            } else {
-                alert(result.error);
-            }
+          const result = await response.json();
+          if (response.ok) {
+            alert(result.message);
+            window.location.href = 'inventoryManagement.html';
+          } else {
+            alert(result.error || 'Erro ao adicionar produto');
+          }
         } catch (error) {
-            alert("An error occurred: " + error.message);
+          alert('Ocorreu um erro: ' + error.message);
         }
+      });
     });
-</script>
+  </script>
 </body>
 </html>

@@ -1,112 +1,574 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestão de Produtos</title>
-    <link rel="stylesheet" href="main.css">
-</head>
-<body>
-    <div class="dashboard-container">
-        
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="profile">
-                <img src="imagem-usuario.png" alt="Icon" class="avatar">
-                <p class="username">Usuário</p>
-            </div>
-            <nav class="menu">
-                <button class="menu-item" onclick="location.href='dashboard.html'">Dashboard Principal</button>
-                <button class="menu-item active-section" onclick="location.href='inventoryManagement.html'">Gestão de Produtos</button>
-                <button class="menu-item" onclick="location.href='demandPrediction.html'">Previsão de Procura</button>
-                <button class="menu-item" onclick="location.href='analytics.html'">Relatórios e Estatísticas</button>
-            </nav>
-        </aside>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Inventário – PrediStock</title>
 
-        <!-- Main Content -->
-        <main class="dashboard-content">
-            <div class="content-header">
-                <h2>Gestão de Produtos</h2>
-                <p>Gerencie seus produtos abaixo.</p>
-            </div>
-
-            <div class="inventory-actions">
-                <input type="text" placeholder="Pesquisar produto..." class="search-input">
-                <button class="btn-primary" onclick="location.href='addProductForm.html'">Adicionar</button>
-            </div>
-
-            <div class="inventory-table">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>SKU ID</th>
-                            <th>Nome do Produto</th>
-                            <th>Unidades Vendidas</th>
-                            <th>Preço Base</th>
-                            <th>Preço Total</th>
-                            <th>Semana</th>
-                            <th>ID Loja</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- JavaScript will insert rows here -->
-                    </tbody>
-                </table>
-            </div>
-        </main>
-    </div>
-
-    <script>
-document.addEventListener('DOMContentLoaded', function () {
-    let allData = [];
-
-    const tbody = document.querySelector('tbody');
-    const searchInput = document.querySelector('.search-input');
-
-    function renderTable(data) {
-        tbody.innerHTML = '';
-
-        if (!data || data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7">Nenhum produto encontrado.</td></tr>';
-            return;
-        }
-
-        data.forEach(item => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${item.sku_id || '-'}</td>
-                <td>${item.product_name || '-'}</td>
-                <td>${item.units_sold || '-'}</td>
-                <td>${item.base_price || '-'}</td>
-                <td>${item.total_price || '-'}</td>
-                <td>${item.week || '-'}</td>
-                <td>${item.store_id || '-'}</td>
-            `;
-            tbody.appendChild(row);
-        });
+  <style>
+    /* === PALETTE VARIABLES === */
+    :root {
+      --color-bg: #0B132B;       /* Oxford Blue */
+      --color-header: #1C2541;   /* Space Cadet */
+      --color-card: #3A506B;     /* YInMn Blue */
+      --color-hover: #5BC0BE;    /* Verdigris */
+      --color-white: #FFFFFF;
+      --color-gray-light: #E5E7EB;
+      --color-gray-medium: #6B7280;
+      --sidebar-width: 200px;    /* fixed sidebar width */
     }
 
-    fetch('http://localhost:5000/api/inventory')
-        .then(response => response.json())
-        .then(data => {
-            allData = data;
-            renderTable(allData);
-        })
-        .catch(error => {
-            console.error('Erro ao buscar os dados:', error);
-        });
+    /* ===== RESET & BASE ===== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background-color: var(--color-bg);
+      color: var(--color-white);
+      font-family: Inter, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+    button, input, select {
+      font-family: Inter, sans-serif;
+    }
 
-    searchInput.addEventListener('input', function () {
+    /* ===== HEADER BAR ===== */
+    .header-bar {
+      background-color: var(--color-header);
+      height: 60px;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 100;
+    }
+    .header-title {
+      display: flex;
+      align-items: center;
+      font-size: 1.25rem;   /* ~text-xl */
+      font-weight: 700;
+    }
+    .header-logo {
+      height: 32px;
+      width: auto;
+      margin-right: 12px;
+    }
+    /* User menu (username + dropdown) */
+    .user-menu {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .user-menu button {
+      background: none;
+      border: none;
+      color: var(--color-white);
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+    }
+    .user-menu button:focus {
+      outline: none;
+    }
+    .user-menu button::after {
+      content: "▾";
+      margin-left: 6px;
+      font-size: 0.7rem;
+    }
+    .dropdown {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: 100%;
+      background-color: var(--color-header);
+      border: 1px solid #2A3A4A;
+      border-radius: 6px;
+      margin-top: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+      white-space: nowrap;
+      z-index: 200;
+    }
+    .dropdown.show {
+      display: block;
+    }
+    .dropdown button {
+      background: none;
+      border: none;
+      color: var(--color-white);
+      font-size: 0.9rem;
+      padding: 10px 16px;
+      width: 100%;
+      text-align: left;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+    .dropdown button:hover {
+      background-color: rgba(91, 192, 190, 0.2); /* translucent Verdigris */
+    }
+
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      position: fixed;
+      top: 60px; /* below header */
+      left: 0;
+      width: var(--sidebar-width);
+      height: calc(100% - 60px);
+      background-color: var(--color-header);
+      padding-top: 16px;
+      box-shadow: 2px 0 6px rgba(0, 0, 0, 0.3);
+      overflow-y: auto;
+      z-index: 50;
+    }
+    .sidebar ul {
+      list-style: none;
+    }
+    .sidebar li {
+      margin-bottom: 12px;
+    }
+    .sidebar a {
+      display: block;
+      padding: 10px 16px;
+      color: var(--color-white);
+      font-size: 1rem;
+      transition: background-color 0.2s ease;
+    }
+    .sidebar a:hover {
+      background-color: var(--color-card);
+    }
+    .sidebar a.active {
+      background-color: var(--color-hover);
+      font-weight: 600;
+    }
+
+    /* ===== CONTENT WRAPPER ===== */
+    .content-wrapper {
+      margin-top: 60px; /* below header */
+      margin-left: var(--sidebar-width);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 24px;
+      align-items: center;
+    }
+
+    /* ===== PAGE HEADING ===== */
+    .page-heading {
+      font-size: 1.5rem; /* ~text-2xl */
+      font-weight: 700;
+      margin-bottom: 24px;
+      text-align: center;
+      color: var(--color-white);
+    }
+
+    /* ===== SEARCH + ENTRIES/PAGE CONTROLS ===== */
+    .controls-wrapper {
+      width: 100%;
+      max-width: 1000px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .search-container {
+      flex: 1 1 300px;
+      margin-right: 16px;
+    }
+    .search-container input[type="text"] {
+      width: 100%;
+      padding: 12px 16px;
+      font-size: 1rem;
+      border: 2px solid var(--color-bg);
+      border-radius: 8px;
+      background-color: var(--color-white);
+      color: var(--color-bg);
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+    .search-container input[type="text"]:focus {
+      border-color: var(--color-hover);
+    }
+    .entries-container {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      margin-top: 8px;
+    }
+    .entries-container label {
+      margin-right: 8px;
+      font-size: 0.9rem;
+      color: var(--color-white);
+    }
+    .entries-container select {
+      padding: 6px 10px;
+      font-size: 0.9rem;
+      border-radius: 6px;
+      border: 1px solid var(--color-bg);
+      background-color: var(--color-white);
+      color: var(--color-bg);
+      cursor: pointer;
+      outline: none;
+    }
+
+    /* ===== TABLE STYLES ===== */
+    .table-wrapper {
+      width: 100%;
+      max-width: 1000px;
+      overflow-x: auto; /* allow horizontal scroll on small screens */
+      background-color: var(--color-card);
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 800px; /* ensure columns have breathing room */
+    }
+    thead {
+      background-color: var(--color-header);
+    }
+    th, td {
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      text-align: left;
+      font-size: 0.9rem;
+      color: var(--color-white);
+      white-space: nowrap;
+    }
+    th {
+      font-weight: 600;
+    }
+    tbody tr:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+    td {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ===== PAGINATION STYLES ===== */
+    .pagination-wrapper {
+      margin-top: 16px;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      max-width: 1000px;
+    }
+    .pagination-wrapper button {
+      margin: 4px;
+      padding: 6px 12px;
+      background-color: var(--color-card);
+      border: 1px solid var(--color-bg);
+      border-radius: 4px;
+      color: var(--color-white);
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+    .pagination-wrapper button:hover {
+      background-color: var(--color-hover);
+    }
+    .pagination-wrapper button.active {
+      background-color: var(--color-hover);
+      font-weight: 600;
+    }
+    .pagination-wrapper button:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- ===== HEADER BAR ===== -->
+  <div class="header-bar">
+    <div class="header-title">
+      PrediStock
+    </div>
+    <div class="user-menu">
+      <button id="userButton">Loading…</button>
+      <div id="userDropdown" class="dropdown">
+        <button id="logoutLink">Logout</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SIDEBAR ===== -->
+  <nav class="sidebar">
+    <ul>
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="inventoryManagement.html" class="active">Inventory</a></li>
+      <li><a href="addProductForm.html">Add Product</a></li>
+      <li><a href="analytics.html">Analytics</a></li>
+      <li><a href="demandPrediction.html">Demand Forecast</a></li>
+    </ul>
+  </nav>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <div class="content-wrapper">
+    <div class="page-heading">Products</div>
+
+    <!-- ===== SEARCH + ENTRIES/PAGE ===== -->
+    <div class="controls-wrapper">
+      <div class="search-container">
+        <input
+          type="text"
+          id="searchInput"
+          placeholder="Pesquisar produto..."
+        />
+      </div>
+      <div class="entries-container">
+        <label for="entriesPerPage">Mostrar</label>
+        <select id="entriesPerPage">
+          <option value="10">10</option>
+          <option value="25">25</option>
+          <option value="50">50</option>
+          <option value="all">Todos</option>
+        </select>
+        <label for="entriesPerPage">entradas</label>
+      </div>
+    </div>
+
+    <!-- ===== TABLE ===== -->
+    <div class="table-wrapper">
+      <table id="inventoryTable">
+        <thead>
+          <tr>
+            <th>SKU ID</th>
+            <th>Nome do Produto</th>
+            <th>Unidades Vendidas</th>
+            <th>Preço Base</th>
+            <th>Preço Total</th>
+            <th>Semana</th>
+            <th>ID da Loja</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Rows injected by JS -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ===== PAGINATION ===== -->
+    <div id="pagination" class="pagination-wrapper">
+      <!-- Buttons injected by JS (Prev, page numbers, Next) -->
+    </div>
+  </div>
+
+  <!-- ===== JAVASCRIPT ===== -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      /* ------------------------------------ */
+      /* 1) SETUP SELECTORS & STATE VARIABLES */
+      /* ------------------------------------ */
+      const userButton     = document.getElementById('userButton');
+      const userDropdown   = document.getElementById('userDropdown');
+      const logoutLink     = document.getElementById('logoutLink');
+      const searchInput    = document.getElementById('searchInput');
+      const tableBody      = document.querySelector('#inventoryTable tbody');
+      const entriesSelect  = document.getElementById('entriesPerPage');
+      const paginationDiv  = document.getElementById('pagination');
+
+      let allData = [];           // full inventory data from the server
+      let filteredData = [];      // after applying search filter
+      let currentPage = 1;        // current page index (1‐based)
+      let entriesPerPage = 10;    // default # of rows per page
+
+      /* ------------------------------------ */
+      /* 2) FETCH CURRENT USER OR REDIRECT TO LOGIN */
+      /* ------------------------------------ */
+      fetch('http://127.0.0.1:5000/api/current_user', {
+        headers: {
+          'Authorization': 'Bearer ' + localStorage.getItem('jwtToken')
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (!data.logged_in) {
+          window.location = 'http://127.0.0.1:5500/front-end/login.html';
+          return;
+        }
+        // Display the dynamic username
+        userButton.textContent = data.username;
+      })
+      .catch(err => {
+        console.error('Error fetching current user:', err);
+        window.location = 'http://127.0.0.1:5500/front-end/login.html';
+      });
+
+      userButton.addEventListener('click', function (e) {
+        e.stopPropagation();
+        userDropdown.classList.toggle('show');
+      });
+      document.addEventListener('click', function () {
+        if (userDropdown.classList.contains('show')) {
+          userDropdown.classList.remove('show');
+        }
+      });
+      userDropdown.addEventListener('click', function (e) {
+        e.stopPropagation();
+      });
+      logoutLink.addEventListener('click', function () {
+        localStorage.removeItem('jwtToken');
+        window.location = 'http://127.0.0.1:5500/front-end/login.html';
+      });
+
+      /* ------------------------------------ */
+      /* 3) FETCH INVENTORY DATA FROM BACKEND */
+      /* ------------------------------------ */
+      fetch('http://127.0.0.1:5000/api/inventory', {
+        headers: {
+          'Authorization': 'Bearer ' + localStorage.getItem('jwtToken')
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        allData = data;
+        filteredData = allData.slice(); // copy for filtering
+        updateTableAndPagination();     // initial render
+      })
+      .catch(err => {
+        console.error('Error fetching inventory:', err);
+      });
+
+      /* ------------------------------------ */
+      /* 4) SEARCH FILTER LOGIC */
+      /* ------------------------------------ */
+      searchInput.addEventListener('input', function () {
         const query = this.value.toLowerCase();
-
-        const filtered = allData.filter(item =>
-            (item.product_name || '').toLowerCase().includes(query)
+        filteredData = allData.filter(item =>
+          (item.product_name || '').toLowerCase().includes(query)
         );
+        currentPage = 1; // reset to first page whenever filter changes
+        updateTableAndPagination();
+      });
 
-        renderTable(filtered);
+      /* ------------------------------------ */
+      /* 5) ENTRIES PER PAGE CHANGE LOGIC */
+      /* ------------------------------------ */
+      entriesSelect.addEventListener('change', function () {
+        const val = this.value;
+        if (val === 'all') {
+          entriesPerPage = filteredData.length || 1; // show all
+        } else {
+          entriesPerPage = parseInt(val, 10);
+        }
+        currentPage = 1; // reset to first page when page size changes
+        updateTableAndPagination();
+      });
+
+      /* ------------------------------------ */
+      /* 6) PAGINATION BUTTON HANDLING */
+      /* ------------------------------------ */
+      function goToPage(page) {
+        currentPage = page;
+        updateTableAndPagination();
+      }
+
+      function prevPage() {
+        if (currentPage > 1) {
+          currentPage--;
+          updateTableAndPagination();
+        }
+      }
+
+      function nextPage(totalPages) {
+        if (currentPage < totalPages) {
+          currentPage++;
+          updateTableAndPagination();
+        }
+      }
+
+      /* ------------------------------------ */
+      /* 7) UPDATE TABLE AND PAGINATION UI */
+      /* ------------------------------------ */
+      function updateTableAndPagination() {
+        const totalEntries = filteredData.length;
+        const totalPages = Math.ceil(totalEntries / entriesPerPage);
+
+        // Clamp currentPage to valid range
+        if (currentPage < 1) currentPage = 1;
+        if (currentPage > totalPages) currentPage = totalPages;
+
+        // Calculate slice indices
+        const startIdx = (currentPage - 1) * entriesPerPage;
+        const endIdx = startIdx + entriesPerPage;
+        const pageData = filteredData.slice(startIdx, endIdx);
+
+        renderTable(pageData);
+        renderPagination(totalPages);
+      }
+
+      /* ------------------------------------ */
+      /* 8) RENDER TABLE ROWS FOR CURRENT PAGE */
+      /* ------------------------------------ */
+      function renderTable(data) {
+        tableBody.innerHTML = ''; // clear existing rows
+        data.forEach(item => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${item.sku_id || ''}</td>
+            <td>${item.product_name || ''}</td>
+            <td>${item.units_sold || ''}</td>
+            <td>${item.base_price || ''}</td>
+            <td>${item.total_price || ''}</td>
+            <td>${item.week || ''}</td>
+            <td>${item.store_id || ''}</td>
+          `;
+          tableBody.appendChild(row);
+        });
+      }
+
+      /* ------------------------------------ */
+      /* 9) RENDER PAGINATION BUTTONS BELOW TABLE */
+      /* ------------------------------------ */
+      function renderPagination(totalPages) {
+        paginationDiv.innerHTML = ''; // clear existing buttons
+
+        if (totalPages <= 1) {
+          return; // no pagination needed for 0 or 1 page
+        }
+
+        // “Previous” button
+        const prevBtn = document.createElement('button');
+        prevBtn.textContent = 'Anterior';
+        prevBtn.disabled = (currentPage === 1);
+        prevBtn.addEventListener('click', prevPage);
+        paginationDiv.appendChild(prevBtn);
+
+        // Page number buttons (1, 2, 3, …)
+        for (let i = 1; i <= totalPages; i++) {
+          const pageBtn = document.createElement('button');
+          pageBtn.textContent = i;
+          if (i === currentPage) {
+            pageBtn.classList.add('active');
+          }
+          pageBtn.addEventListener('click', () => goToPage(i));
+          paginationDiv.appendChild(pageBtn);
+        }
+
+        // “Next” button
+        const nextBtn = document.createElement('button');
+        nextBtn.textContent = 'Próxima';
+        nextBtn.disabled = (currentPage === totalPages);
+        nextBtn.addEventListener('click', () => nextPage(totalPages));
+        paginationDiv.appendChild(nextBtn);
+      }
     });
-});
-</script>
-
+  </script>
 </body>
 </html>
